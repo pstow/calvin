@@ -1,0 +1,23 @@
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\bin\Release\Carbon Capture.exe.config
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\bin\Release\Carbon Capture.exe
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\bin\Release\Carbon Capture.pdb
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\HelpManager\MessageWindow.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\Touch\Keyboard.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\HelpManager\MessageWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\MainWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\Touch\Keyboard.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\App.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\Carbon Capture_Content.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\GeneratedInternalTypeHelper.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\Carbon Capture_MarkupCompile.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\Carbon Capture_MarkupCompile.lref
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\App.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\MainWindow.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\Carbon Capture.g.resources
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\Carbon_Capture.Properties.Resources.resources
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\Carbon Capture.csproj.GenerateResource.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\Carbon Capture.csproj.CoreCompileInputs.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\Carbon Capture.csproj.CopyComplete
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\Carbon Capture.exe
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\Carbon Capture.pdb
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\IdeaLab\Carbon Capture HMI\Carbon Capture\obj\Release\Carbon Capture.csprojAssemblyReference.cache

@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_Temperature" Id="{b0c73f2e-26d0-4c57-b376-becd046dc3ba}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_Temperature : REAL
+VAR_INPUT
+	Input											: INT;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Calvin - F_Temperature
+// Rev 1.0 - March 3, 2023
+
+F_Temperature										:= INT_TO_REAL(Input) / 10.0;
+]]></ST>
+    </Implementation>
+    <LineIds Name="F_Temperature">
+      <LineId Id="9" Count="3" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

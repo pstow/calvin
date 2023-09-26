@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_Alarms" Id="{771b8548-97b3-449f-b119-9e44a84992f1}">
+    <Declaration><![CDATA[// Calvin - E_Alarms
+// Rev 1.00 - May 25, 2023
+
+TYPE E_Alarms :
+(
+	eNo_Alarms							:= 0,
+	eWarmup_Alarm,					
+	eEvacuation_Alarm,					
+	eSteamBypass_Alarm,					
+	eDesorption_Alarm,					
+	eRepressurization_Alarm,					
+	eAdsorption_Alarm,					
+	eSystem_Alarm,					
+	eTC_Alarm,					
+	eT09_Alarm,					
+	eT10_Alarm,					
+	eT11_Alarm,					
+	eT12_Alarm,					
+	eT13_Alarm,					
+	eT14_Alarm,					
+	eT15_Alarm,					
+	eT16_Alarm,					
+	eT17_Alarm,					
+	eT18_Alarm,					
+	eT19_Alarm,					
+	eT20_Alarm,					
+	eTimeout_Alarm,							// 21		
+	e22_Error,		
+	eReactorBackflow_Error,			
+	eEvacTargetPressure_Error,		
+	eCondensateLS_Error,			
+	eDesorpNominalPressure_Error,	
+	eDesorpCO2Conc_Error,			
+	eReactorCooling_Error,			
+	eReactorHighPressure_Error,		
+	eReactorLowPressure_Error,		
+	eReactorHighTemp_Error,			
+	eReactorLowTemp_Error,			
+	eHighLevel_Error,				
+	eLowLevel_Error,				
+	eVacuumHighTemp_Error,			
+	eCondenserNoFlow_Error,			
+	eHeatTrace_Error,				
+	eSteamLS_Error,					
+	eHeatTraceTimeout_Error,		
+	eDPT_311_Error,					
+	eDPTError						
+);                                  
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

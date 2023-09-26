@@ -1,0 +1,3171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="P_State_Machine" Id="{f6aabd2c-aa95-49f4-9733-581e1a68a6fc}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_State_Machine
+VAR RETAIN
+	gpdiCycle_Count									: DINT;
+END_VAR
+VAR
+	strStatusLabel									: ARRAY[0..50] OF STRING;
+	strError										: STRING;
+	strProcessError									: STRING;
+	bStatusListLoaded								: BOOL;	
+	
+	rtrigWarmup										: R_TRIG;
+	rtrigEvacuation									: R_TRIG;
+	rtrigSteamBypass								: R_TRIG;
+	rtrigDesorption									: R_TRIG;
+	rtrigRepressurization							: R_TRIG;
+	rtrigAdsorption									: R_TRIG;
+	rtrigStatusReady								: R_TRIG;
+
+	iStep											: INT;
+	i1Step											: INT;
+	i2Step											: INT;
+	i3Step											: INT;
+	i4Step											: INT;
+	i5Step											: INT;
+	i6Step											: INT;
+	
+	bVacuumHolding									: BOOL;
+	bWarmUpDone										: BOOL;
+	bRunEvacuation									: BOOL;
+	bEvacuationDone									: BOOL;
+	bSteamBypassDone								: BOOL;
+	bDesorptionDone							        : BOOL;
+	bRepressurizationDone							: BOOL;
+	bAdsorptionDone									: BOOL;
+	bRunning										: BOOL;
+	bInRange1										: BOOL;
+	bInRange2										: BOOL;
+	bInRange3										: BOOL;
+	bTempAGood										: BOOL;
+	bTempBGood										: BOOL;
+	bTempCGood										: BOOL;
+	bOverTemp										: BOOL;
+	bStop											: BOOL;
+	bTimer1											: BOOL;
+	bTimer2											: BOOL;
+	rTime1											: REAL;
+	rTime2											: REAL;
+	rSP1											: REAL;
+	rSP2											: REAL;
+	tonTimer1										: TON;
+	tonTimer2										: TON;
+	tonReset										: TON;
+	tonPause										: TON;
+
+	bRunValveModulation								: BOOL;
+	bValveInRange									: BOOL;
+	bFanError										: BOOL;
+	bClearDrains									: BOOL;
+	bCondenserLow									: BOOL;				// 09/07/23 PS
+	bCondenserFull									: BOOL;				// 09/19/23 PS
+	bCondenserRefill								: BOOL;				// 09/21/23 PS
+	rOut											: REAL;
+	rPI_1100_Save									: REAL;
+	
+	bDrainLSHClear									: BOOL;
+	bDrainLSLClear									: BOOL;
+	b1200DrainOROff									: BOOL;				// AF_Drains 4/7/23
+	b1201DrainOn									: BOOL;				// AF_Drains 4/7/23
+	b1202DrainOn									: BOOL;				// AF_Drains 4/7/23
+	b1300DrainOn									: BOOL;				// 09/21/23 PS
+	bDrainOn										: BOOL;				// AF_Drains 4/7/23
+	b1201DrainOROff									: BOOL;				// 09/20/23 PS
+	b1202DrainOROff									: BOOL;				// 09/20/23 PS
+	b1202DrainOROn									: BOOL;				// 09/20/23 PS
+	rtrigDrainsOff									: R_TRIG;			// 09/20/23 PS
+	
+	// A_DPT_Fan_Test
+	tonFanTest										: TON;
+	rtrigFanTest									: R_TRIG;
+	ftrigFanTest									: F_TRIG;	
+	tFanTestTime									: TIME	:= T#60S;
+	rHS_1102										: REAL	:= 0.0;
+	rFanIncrement									: REAL	:= 10.0;
+	rFanMaximum										: REAL	:= 100.0;
+	iFanTestStep									: INT	:= 0;
+	bFanTimer										: BOOL;
+
+	// A_Modbus_VFD
+	MBV_Master 										: ModbusRtuMasterV2_KL6x22B;	
+	MBV_Errors										: MODBUS_ERRORS;
+	tonMBVReset										: TON;
+	bMBVBusy										: BOOL;
+	bMBVError										: BOOL;
+	bMBVReadStatus									: BOOL;
+	bMBVStatusCheck									: BOOL;
+	iMBVFunction									: INT;
+	iMBVHzRetry										: INT;
+	uiMBVRead										: UINT;	
+	wMBVAddress										: WORD;
+	wMBVQuantity									: WORD;
+	wMBVOnOff										: WORD;
+	wMBVStatus										: WORD 	:= 3;
+	wMBVReadData 									: ARRAY[0..21] OF WORD;
+	wMBVWriteData 									: ARRAY[0..21] OF WORD;
+	// A_Modbus_Points
+	MBP_Master 										: ModbusRtuMasterV2_KL6x22B;	
+	MBP_Errors										: MODBUS_ERRORS;
+	tonMBPReset										: TON;
+	bMBPWeather										: BOOL;
+	bMBPBusy										: BOOL;
+	bMBPError										: BOOL;
+	iMBPFunction									: INT;
+	uiMBPRead										: UINT;	
+	wMBPAddress										: WORD;
+	wMBPQuantity									: WORD;
+	wMBPReadData 									: ARRAY[0..21] OF WORD;
+	wMBPWriteData 									: ARRAY[0..21] OF WORD;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Calvin - P_State_Machine
+// Rev 1.00 - September 21, 2023
+
+IF NOT bStatusListLoaded THEN
+	A_Status_List();
+END_IF
+
+A_Temperatures();																											// Run these actions continuously
+A_Inputs_Outputs();
+A_Interlocks();
+A_Modbus_VFD();
+//A_Modbus_Points();
+A_DPT_Fan_Test();
+A_WaterHandling();
+
+rtrigWarmup(CLK:= tgi_Machine_State = eWarmup);																				// Set trigger (one shot) on initial entry of each state
+rtrigEvacuation(CLK:= tgi_Machine_State = eEvacuation);
+rtrigSteamBypass(CLK:= tgi_Machine_State = eSteamBypass);
+rtrigDesorption(CLK:= tgi_Machine_State = eDesorption);
+rtrigRepressurization(CLK:= tgi_Machine_State = eRepressurization);
+rtrigAdsorption(CLK:= tgi_Machine_State = eAdsorption);
+
+IF rtrigWarmup.Q THEN																										// Warm up triggered
+	bWarmUpDone										:= FALSE;																// Clear Done flag
+	i1Step											:= 1;
+	eState											:= eWarmup;																// Set state
+ELSIF rtrigEvacuation.Q THEN
+	bEvacuationDone									:= FALSE;
+	i2Step											:= 1;
+	eState											:= eEvacuation;
+ELSIF rtrigSteamBypass.Q THEN
+	bSteamBypassDone								:= FALSE;
+	i3Step											:= 1;
+	eState											:= eSteamBypass;
+ELSIF rtrigDesorption.Q THEN
+	bDesorptionDone									:= FALSE;
+	i4Step											:= 1;
+	eState											:= eDesorption;
+ELSIF rtrigRepressurization.Q THEN
+	bRepressurizationDone							:= FALSE;
+	i5Step											:= 1;
+	eState											:= eRepressurization;
+ELSIF rtrigAdsorption.Q THEN																								// Adsorption triggered
+	bAdsorptionDone									:= FALSE;																// Clear Done flag
+	bFanError										:= FALSE;
+	i6Step											:= 1;																	// Start Adsorption Case statement
+	eState											:= eAdsorption;															// Set state
+END_IF
+
+bDrainOn 											:= eState >= eWarmup AND eState <= eAdsorption;							// Turn on drain function
+
+CASE eState OF
+	
+	eIdle:
+		tgi_Machine_State							:= eIdle;																// Indicate state to HMI
+		tgb_Auto_Mode								:= FALSE;																// Clear flags
+		tgb_Stop_Cycle								:= FALSE;
+		i1Step										:= 0;
+		i2Step										:= 0;
+		i3Step										:= 0;
+		i4Step										:= 0;
+		i5Step										:= 0;
+		i6Step										:= 0;
+		tgi_Current_Step							:= 0;
+		IF bRunEvacuation THEN
+			tgi_Machine_State						:= eEvacuation;
+		ELSE
+			tgi_Status								:= SEL(tgb_Test_Running, SEL(NOT tgb_Warmup_Complete, eSystem_Ready, eStart_Warm_Up), eTest_Running);
+		END_IF
+		
+	eWarmup:
+		tgi_Status									:= SEL(bStop, eWarmup_Running, eStopping_Warmup);
+		IF tgb_Stop_Cycle THEN																							
+			bStop									:= TRUE;
+		ELSIF bWarmUpDone THEN																								// Process complete
+			bStop									:= FALSE;
+			IF tgb_Warmup_Complete THEN
+				eState								:= eIdle;																// Return to manual state
+			ELSE
+				eState								:= ePause;																// User stopped - allow status string to be displayed momentarily
+			END_IF	
+		END_IF
+		
+	eEvacuation:
+		tgi_Status									:= SEL(bStop, eEvacuation_Running, SEL(tgb_Auto_Mode, eStopping_Evacuation, eStopping_Process));
+		IF tgb_Stop_Cycle THEN
+			bStop									:= TRUE;			
+		ELSIF bEvacuationDone THEN
+			IF tgb_Auto_Mode THEN
+				tgi_Machine_State					:= eSteamBypass;
+			ELSE
+				IF bStop THEN
+					bStop							:= FALSE;
+					eState							:= eIdle;
+				ELSE
+					tgi_Status						:= eEvacuation_Complete;
+					bRunEvacuation					:= FALSE;
+					eState							:= ePause;
+				END_IF
+			END_IF
+		END_IF
+		
+	eSteamBypass:
+		tgi_Status									:= SEL(bStop, eSteamBypass_Running, SEL(tgb_Auto_Mode, eStopping_SteamBypass, eStopping_Process));
+		IF tgb_Stop_Cycle THEN
+			bStop									:= TRUE;
+		ELSIF bSteamBypassDone THEN
+			IF tgb_Auto_Mode THEN
+				tgi_Machine_State					:= eDesorption;
+			ELSE
+				IF bStop THEN
+					bStop							:= FALSE;
+					eState							:= eIdle;
+				ELSE
+					tgi_Status						:= eSteamBypass_Complete;
+					eState							:= ePause;
+				END_IF
+			END_IF
+		END_IF
+		
+	eDesorption:
+		tgi_Status									:= SEL(bStop, eDesorption_Running, SEL(tgb_Auto_Mode, eStopping_Desorption, eStopping_Process));
+		IF tgb_Stop_Cycle THEN
+			bStop									:= TRUE;
+		ELSIF bDesorptionDone THEN
+			IF tgb_Auto_Mode THEN
+				tgi_Machine_State					:= eRepressurization;
+			ELSE
+				IF bStop THEN
+					bStop							:= FALSE;
+					eState							:= eIdle;
+				ELSE
+					tgi_Status						:= eDesorption_Complete;
+					eState							:= ePause;
+				END_IF
+			END_IF
+		END_IF
+		
+	eRepressurization:
+		tgi_Status									:= SEL(bStop, eRepressurization_Running, SEL(tgb_Auto_Mode, eStopping_Repressurization, eStopping_Process));
+		IF tgb_Stop_Cycle THEN
+			bStop									:= TRUE;
+		ELSIF bRepressurizationDone THEN
+			IF tgb_Auto_Mode THEN
+				tgi_Machine_State					:= eAdsorption;
+			ELSE
+				IF bStop THEN
+					bStop							:= FALSE;
+					eState							:= eIdle;
+				ELSE
+					tgi_Status						:= eRepressurization_Complete;
+					eState							:= ePause;
+				END_IF
+			END_IF
+		END_IF
+		
+	eAdsorption:
+		tgi_Status									:= SEL(bStop, eAdsorption_Running, SEL(tgb_Auto_Mode, eStopping_Adsorption, eStopping_Process));
+		IF tgb_Stop_Cycle THEN
+			bStop									:= TRUE;
+		ELSIF bAdsorptionDone THEN
+			IF tgb_Auto_Mode THEN
+				tgi_Cycle_Count						:= tgi_Cycle_Count + 1;
+				gpdiCycle_Count						:= gpdiCycle_Count + 1;
+				IF tgi_Cycle_Count >= tgi_Cycles_To_Run THEN
+					eState							:= eIdle;
+				ELSE
+					tgi_Machine_State				:= eEvacuation;
+				END_IF
+			ELSE
+				IF bFanError THEN
+					tgi_Machine_State				:= eEvacuation;
+				ELSIF bStop THEN
+					bStop							:= FALSE;
+					eState							:= eIdle;
+				ELSIF bRunEvacuation THEN
+					eState							:= eIdle;
+				ELSE
+					tgi_Status						:= eAdsorption_Complete;
+					eState							:= ePause;
+				END_IF
+			END_IF
+		END_IF
+		
+	eReset:
+		IF tonReset.Q THEN
+			A0_Reset();
+			eState									:= eIdle;
+		END_IF
+
+	ePause:
+		tgi_Machine_State							:= ePause;
+		IF tonPause.Q THEN
+			eState									:= eIdle;
+		END_IF
+		
+	eSystemError:
+		;
+		
+END_CASE
+
+CASE tgi_Alarm_State OF
+	
+	1: ;																					// Level 1 alarm 
+	
+	2: ;																					// Level 2 alarm
+	
+	3: 	tgb_Stop_Cycle								:= TRUE;								// Level 3 alarm - stop cycle but no reset
+		tgi_Alarm_State								:= 5;
+	
+	4:	tgb_Warmup_Complete							:= FALSE;								// Level 4 alarm - reset everything
+		A0_Reset();
+		tgi_Alarm_State								:= 5;
+		eState										:= eSystemError;
+
+	5:	 ;
+	
+END_CASE
+
+rtrigStatusReady(CLK:= tgb_Warmup_Complete);
+IF rtrigStatusReady.Q THEN
+	tgi_Status										:= eSystem_Ready;
+END_IF
+
+A1_WarmUp();																										// Run action for this state
+A2_Evacuation();
+A3_SteamBypass();
+A4_Desorption();
+A5_Repressurization();
+A6_Adsorption();
+
+tonTimer1(IN:= bTimer1, PT:= REAL_TO_TIME(rTime1));
+tonTimer2(IN:= bTimer2, PT:= REAL_TO_TIME(rTime2));
+
+IF i1Step + i2Step + i3Step + i4Step + i5Step + i6Step > 0 THEN
+	IF bTimer1 THEN
+		tgr_Remaining_Time							:= rTime1 - TIME_TO_REAL(tonTimer1.ET);
+	ELSIF bTimer2 THEN
+		tgr_Remaining_Time							:= rTime2 - TIME_TO_REAL(tonTimer2.ET);
+	ELSE
+		tgr_Remaining_Time							:= 0;
+	END_IF
+END_IF
+
+tgs_Status											:= strStatusLabel[tgi_Status];
+bRunning											:= eState > eIdle AND eState < eReset;									// 09/19/23 PS
+gbVFDTest											:= SEL(bRunning, gbVFDTest, FALSE);										// 09/19/23 PS
+tgb_Drains_On										:= SEL(tgb_Auto_Mode, tgb_Drains_On, FALSE);							// 09/19/23 PS
+
+tonReset(IN:= eState = eReset, PT:= REAL_TO_TIME(RESET_TIME));
+tonPause(IN:= eState = ePause, PT:= REAL_TO_TIME(RESET_TIME));
+]]></ST>
+    </Implementation>
+    <Action Name="A_ClearProcess" Id="{d2d1c595-9d0b-4fe1-bfa9-c94528b557d5}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - A_ClearProcess
+// Rev 1.00 - September 22, 2023
+
+IF giActiveAlarm > 0 THEN
+	gsAlarmInfo[giActiveAlarm]				:= CONCAT(INT_TO_STRING(iStep), strError);
+	gbAlarmsLoaded							:= FALSE;
+END_IF
+bTimer1								 		:= FALSE;
+bTimer2								 		:= FALSE;
+tgb_Stop_Cycle								:= FALSE;
+tgb_Auto_Mode								:= FALSE;
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_DPT_Fan_Test" Id="{594242e9-131c-4ec6-ad4d-4eadd910c612}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - A_DPT_Fan_Test
+// Rev 1.00 - July 14, 2023
+
+rtrigFanTest(CLK:= tgb_Test_Mode);
+ftrigFanTest(CLK:= tgb_Test_Mode);
+
+IF rtrigFanTest.Q THEN
+	iFanTestStep									:= 1;
+END_IF
+IF ftrigFanTest.Q THEN
+	iFanTestStep									:= 4;
+END_IF
+
+CASE iFanTestStep OF
+	
+	0:	tgb_Test_Running							:= FALSE;
+
+	1:	tgr_IP_1102A								:= 100;
+		tgr_IP_1102B								:= 100;
+		tgb_Test_Running							:= TRUE;
+		rFanIncrement								:= 10;
+		tgr_HS_1102									:= 0;
+		iFanTestStep								:= 2;
+	
+	2:	IF tgb_IP_1102A_Open AND tgb_IP_1102B_Open THEN
+			bFanTimer								:= TRUE;
+			tgr_HS_1102								:= rFanIncrement;
+			iFanTestStep							:= 3;
+		END_IF
+		
+	3:	;
+	
+	4:	bFanTimer									:= FALSE;
+		tgr_HS_1102									:= 0;
+		IF tgr_HS_1102_RPM = 0 THEN
+			tgr_IP_1102A							:= 0;
+			tgr_IP_1102B							:= 0;
+			iFanTestStep							:= 0;
+		END_IF
+
+END_CASE;
+
+IF tonFanTest.Q THEN
+	tgr_HS_1102										:= tgr_HS_1102 + rFanIncrement;
+	IF tgr_HS_1102 > rFanMaximum THEN
+		rFanIncrement								:= 0 - rFanIncrement;
+		tgr_HS_1102									:= rFanMaximum + rFanIncrement;
+	ELSIF tgr_HS_1102 <= 0 THEN
+		tgb_Test_Mode								:= FALSE;
+	END_IF
+	
+	tonFanTest(IN:= FALSE);
+END_IF
+
+tonFanTest(IN:= bFanTimer, PT:= tFanTestTime);
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_Inputs_Outputs" Id="{dbdf6b92-865c-4621-8da1-d9eef1e8baf5}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - A_Inputs_Outputs
+// Rev 1.00 - September 20, 2023
+
+//// DIGITAL IN
+tgb_HS_1104_Open									:= ZSH_1104;			
+tgb_HS_1104_Closed									:= ZSL_1104;				
+tgb_HS_1107_Open									:= ZSH_1107;			
+tgb_HS_1107_Closed									:= ZSL_1107;				
+tgb_HS_1101A_Open									:= ZSH_1101A;				
+tgb_HS_1101A_Closed									:= ZSL_1101A;				
+tgb_HS_1101B_Open									:= ZSH_1101B;				
+tgb_HS_1101B_Closed									:= ZSL_1101B;			
+tgb_HS_1201_LSH										:= LSH_1201;					
+tgb_HS_1201_LSL										:= LSL_1201;					
+tgb_HS_1103A_Open									:= ZSH_1103A;				
+tgb_HS_1103A_Closed									:= ZSL_1103A;				
+tgb_HS_1103B_Open									:= ZSH_1103B;				
+tgb_HS_1103B_Closed									:= ZSL_1103B;				
+tgb_HS_1202_LSH										:= LSH_1202;			
+tgb_HS_1202_LSL										:= LSL_1202;				
+tgb_HS_1302A_Open									:= ZSH_1302A;			
+tgb_HS_1302A_Closed									:= ZSL_1302A;			
+tgb_HS_1301A_Open									:= ZSH_1301A;				
+tgb_HS_1301A_Closed									:= ZSL_1301A;				
+tgb_HS_1301B_Open									:= ZSH_1301B;				
+tgb_HS_1301B_Closed									:= ZSL_1301B;				
+tgb_HS_1300B_Open									:= ZSH_1300;					
+tgb_HS_1300B_Closed									:= ZSL_1300;					
+tgb_HS_1300A_LSH									:= LSH_1300A;			
+tgb_HS_1300A_LSL									:= LSL_1300A;				
+tgb_SV_1201_Open									:= ZSH_1202;				
+tgb_SV_1201_Closed									:= ZSL_1202;				
+
+//// ANALOG IN
+tgr_DPT_1102A										:= F_AnalogIn(DPT_1102A, DPT_1102A_LOW, DPT_1102A_HIGH, DPT_1102A_MIN, DPT_1102A_OFFSET);
+tgr_FIC_1102										:= F_AnalogIn(FIC_1102, FIC_1102_LOW, FIC_1102_HIGH, FIC_1102_MIN, FIC_1102_OFFSET);
+tgr_AI_1102A										:= F_AnalogIn(AI_1102A, AI_1102A_LOW, AI_1102A_HIGH, AI_1102A_MIN, AI_1102A_OFFSET);
+tgr_MI_1102A										:= F_AnalogIn(MI_1102A, MI_1102A_LOW, MI_1102A_HIGH, MI_1102A_MIN, MI_1102A_OFFSET);
+tgr_ZT_1102A										:= F_AnalogIn(ZT_1102A, ZT_1102A_LOW, ZT_1102A_HIGH, ZT_1102A_MIN, ZT_1102A_OFFSET);
+tgr_PI_1100											:= F_AnalogIn(PI_1100, PI_1100_LOW, PI_1100_HIGH, PI_1100_MIN, PI_1100_OFFSET);
+tgr_DPT_1100										:= F_AnalogIn(DPT_1100, DPT_1100_LOW, DPT_1100_HIGH, DPT_1100_MIN, DPT_1100_OFFSET);
+tgr_ZT_1102B										:= F_AnalogIn(ZT_1102B, ZT_1102B_LOW, ZT_1102B_HIGH, ZT_1102B_MIN, ZT_1102B_OFFSET);
+tgr_AI_1102B										:= F_AnalogIn(AI_1102B, AI_1102B_LOW, AI_1102B_HIGH, AI_1102B_MIN, AI_1102B_OFFSET);
+tgr_MI_1102B										:= F_AnalogIn(MI_1102B, MI_1102B_LOW, MI_1102B_HIGH, MI_1102B_MIN, MI_1102B_OFFSET);
+tgr_DPT_1102B										:= F_AnalogIn(DPT_1102B, DPT_1102B_LOW, DPT_1102B_HIGH, DPT_1102B_MIN, DPT_1102B_OFFSET);
+tgr_FI_1200_1										:= F_AnalogIn(FI_1200_1, FI_1200_1_LOW, FI_1200_1_HIGH, FI_1200_1_MIN, FI_1200_1_OFFSET);
+tgr_FI_1200_2										:= F_AnalogIn(FI_1200_2, FI_1200_2_LOW, FI_1200_2_HIGH, FI_1200_2_MIN, FI_1200_2_OFFSET);
+tgr_FI_1200_3										:= F_AnalogIn(FI_1200_3, FI_1200_3_LOW, FI_1200_3_HIGH, FI_1200_3_MIN, FI_1200_3_OFFSET);
+tgr_FI_1201_1										:= F_AnalogIn(FI_1201_1, FI_1201_1_LOW, FI_1201_1_HIGH, FI_1201_1_MIN, FI_1201_1_OFFSET);
+tgr_FI_1201_2										:= F_AnalogIn(FI_1201_2, FI_1201_2_LOW, FI_1201_2_HIGH, FI_1201_2_MIN, FI_1201_2_OFFSET);
+tgr_FI_1201_3										:= F_AnalogIn(FI_1201_3, FI_1201_3_LOW, FI_1201_3_HIGH, FI_1201_3_MIN, FI_1201_3_OFFSET);
+tgr_PI_1200											:= F_AnalogIn(PI_1200, PI_1200_LOW, PI_1200_HIGH, PI_1200_MIN, PI_1200_OFFSET);
+tgr_PI_1001											:= F_AnalogIn(PI_1001, PI_1001_LOW, PI_1001_HIGH, PI_1001_MIN, PI_1001_OFFSET);
+tgr_FI_1001											:= F_AnalogIn(FI_1001, FI_1001_LOW, FI_1001_HIGH, FI_1001_MIN, FI_1001_OFFSET);
+tgr_ZT_1101											:= F_AnalogIn(ZT_1101, ZT_1101_LOW, ZT_1101_HIGH, ZT_1101_MIN, ZT_1101_OFFSET);
+tgr_PI_1101											:= F_AnalogIn(PI_1101, PI_1101_LOW, PI_1101_HIGH, PI_1101_MIN, PI_1101_OFFSET);
+tgr_LI_1204											:= F_AnalogIn(LI_1204, LI_1204_LOW, LI_1204_HIGH, LI_1204_MIN, LI_1204_OFFSET);
+tgr_PI_1300											:= F_AnalogIn(PI_1300, PI_1300_LOW, PI_1300_HIGH, PI_1300_MIN, PI_1300_OFFSET);
+tgr_LIC_1300										:= F_AnalogIn(LIC_1300, LIC_1300_LOW, LIC_1300_HIGH, LIC_1300_MIN, LIC_1300_OFFSET);
+tgr_FI_1300											:= F_AnalogIn(FI_1300, FI_1300_LOW, FI_1300_HIGH, FI_1300_MIN, FI_1300_OFFSET);
+tgr_FI_1301											:= F_AnalogIn(FI_1301, FI_1301_LOW, FI_1301_HIGH, FI_1301_MIN, FI_1301_OFFSET);
+tgr_AI_1301											:= F_AnalogIn(AI_1301, AI_1301_LOW, AI_1301_HIGH, AI_1301_MIN, AI_1301_OFFSET);
+tgr_ZT_1302B										:= F_AnalogIn(ZT_1302B, ZT_1302B_LOW, ZT_1302B_HIGH, ZT_1302B_MIN, ZT_1302B_OFFSET);
+tgr_MI_2001											:= F_AnalogIn(MI_2001, MI_2001_LOW, MI_2001_HIGH, MI_2001_MIN, MI_2001_OFFSET);
+tgr_TI_2001											:= F_AnalogIn(TI_2001, TI_2001_LOW, TI_2001_HIGH, TI_2001_MIN, TI_2001_OFFSET);
+tgr_SI_2001											:= F_AnalogIn(SI_2001, SI_2001_LOW, SI_2001_HIGH, SI_2001_MIN, SI_2001_OFFSET);
+tgr_ZI_2001											:= F_AnalogIn(ZI_2001, ZI_2001_LOW, ZI_2001_HIGH, ZI_2001_MIN, ZI_2001_OFFSET);
+tgr_PI_2001											:= F_AnalogIn(PI_2001, PI_2001_LOW, PI_2001_HIGH, PI_2001_MIN, PI_2001_OFFSET);
+tgr_ZXI_2002										:= F_AnalogIn(WORD_TO_INT(ZXI_2002), ZXI_2002_LOW, ZXI_2002_HIGH, ZXI_2002_MIN, ZXI_2002_OFFSET);		
+tgr_ZYI_2002										:= F_AnalogIn(WORD_TO_INT(ZYI_2002), ZYI_2002_LOW, ZYI_2002_HIGH, ZYI_2002_MIN, ZYI_2002_OFFSET);		
+tgr_IT_1											:= F_Current(IT_1);
+tgr_IT_2											:= F_Current(IT_2); 
+tgr_IT_3											:= F_Current(IT_3); 
+tgr_VT_1											:= F_Voltage(VT_1);
+tgr_VT_2											:= F_Voltage(VT_2);
+tgr_VT_3											:= F_Voltage(VT_3);
+
+//// DIGITAL OUT
+YL_1001												:= tgb_YL_1001;
+tgb_YL_1001_On										:= YL_1001; 
+YL_1002												:= YL_1001;										// YL_1002 is triggered whenever YL_1001 is triggered
+HS_1107												:= tgb_HS_1107;	
+tgb_HS_1107_On										:= HS_1107;			
+HS_1101A											:= tgb_HS_1101A;
+tgb_HS_1101A_On										:= HS_1101A;
+HS_1101B											:= tgb_HS_1101B;
+tgb_HS_1101B_On										:= HS_1101B;				
+HS_1201												:= tgb_HS_1201;
+tgb_HS_1201_On										:= HS_1201;				
+AI_1102A_Pump										:= tgb_AI_1102A_Pump OR bRunning;										// 09/19/23 PS
+tgb_AI_1102A_Pump_On								:= AI_1102A_Pump;
+AI_1102A_Solenoid									:= NOT tgb_AI_1102A_Solenoid AND NOT bRunning;							// 09/19/23 PS
+tgb_AI_1102A_Solenoid_On							:= NOT AI_1102A_Solenoid;													
+AI_1102B_Pump										:= tgb_AI_1102B_Pump OR bRunning;										// 09/19/23 PS
+tgb_AI_1102B_Pump_On								:= AI_1102B_Pump;
+AI_1102B_Solenoid									:= NOT tgb_AI_1102B_Solenoid AND NOT bRunning;							// 09/19/23 PS			
+tgb_AI_1102B_Solenoid_On							:= NOT AI_1102B_Solenoid;													
+HS_1103A											:= tgb_HS_1103A;
+tgb_HS_1103A_On										:= HS_1103A;				
+HS_1103B											:= tgb_HS_1103B;
+tgb_HS_1103B_On										:= HS_1103B;				
+HS_1202												:= tgb_HS_1202;	
+tgb_HS_1202_On										:= HS_1202;			
+HS_1203												:= tgb_HS_1203;				
+tgb_HS_1203_On										:= HS_1203;				
+HS_1200												:= tgb_HS_1200;				
+tgb_HS_1200_On										:= HS_1200;
+SV_1201												:= tgb_SV_1201;												// 09/19/23 PS	
+tgb_SV_1201_On										:= SV_1201;			
+HS_1302A											:= tgb_HS_1302A;
+tgb_HS_1302A_On										:= HS_1302A;				
+HS_1301A											:= tgb_HS_1301A;
+tgb_HS_1301A_On										:= HS_1301A;				
+HS_1301												:= tgb_HS_1301;
+tgb_HS_1301_On										:= HS_1301;				
+HS_1301B											:= tgb_HS_1301B;
+tgb_HS_1301B_On										:= HS_1301B;			
+HS_1300A											:= tgb_HS_1300A;
+tgb_HS_1300A_On										:= HS_1300A;			
+HS_1300B											:= tgb_HS_1300B;
+tgb_HS_1300B_On										:= HS_1300B;				
+HS_1305												:= tgb_HS_1305;
+tgb_HS_1305_On										:= HS_1305;
+HS_1104												:= tgb_HS_1104;
+tgb_HS_1104_On										:= HS_1104;
+
+//// ANALOG OUT
+IF bRunValveModulation THEN
+	IF tgr_PI_1100 >= tgr_SP_IP_1302B_Reactor_High THEN
+		tgr_IP_1302B								:= tgr_SP_IP_1302B_Valve_Low;
+	ELSIF tgr_PI_1100 <= tgr_SP_IP_1302B_Reactor_Low THEN
+		tgr_IP_1302B								:= tgr_SP_IP_1302B_Valve_High;
+	END_IF
+	bValveInRange									:= tgr_PI_1100 >= tgr_SP_IP_1302B_Reactor_Low AND tgr_PI_1100 <= tgr_SP_IP_1302B_Reactor_High;
+END_IF
+		
+tgb_IP_1102A_Open									:= tgr_ZT_1102A > (BV_OPEN_MAX - BV_OPEN_POS_THRESHOLD);
+tgb_IP_1102A_Closed									:= tgr_ZT_1102A < BV_CLOSED_POS_THRESHOLD;
+tgb_IP_1102B_Open									:= tgr_ZT_1102B > (BV_OPEN_MAX - BV_OPEN_POS_THRESHOLD);
+tgb_IP_1102B_Closed									:= tgr_ZT_1102B < BV_CLOSED_POS_THRESHOLD;
+gbHS_1102ValvesOpen									:= tgb_IP_1102A_Open AND tgb_IP_1102B_Open;
+gbHS_1102ValvesClosed								:= tgb_IP_1102A_Closed AND tgb_IP_1102B_Closed;
+
+gbRunVFD											:= TRUE;
+HS_1102_Enable										:= gbRunVFD;		
+grHS_1102Out										:= SEL(NOT tgb_HS_1102_Enabled OR NOT gbHS_1102ValvesOpen, tgr_HS_1102, 0);
+HS_1102_Out											:= REAL_TO_INT(grHS_1102Out * PERCENT_FACTOR);
+tgr_HS_1102_Output									:= grHS_1102Out;
+
+IP_1302B											:= REAL_TO_INT(tgr_IP_1302B * PERCENT_FACTOR);
+tgr_IP_1302B_Output									:= tgr_IP_1302B;
+IP_1101												:= REAL_TO_INT(tgr_IP_1101 * PERCENT_FACTOR);
+tgr_IP_1101_Output									:= tgr_IP_1101;
+IP_1102A											:= REAL_TO_INT(tgr_IP_1102A * PERCENT_FACTOR);
+tgr_IP_1102A_Output									:= tgr_IP_1102A;
+IP_1102B											:= REAL_TO_INT(tgr_IP_1102B * PERCENT_FACTOR);
+tgr_IP_1102B_Output									:= tgr_IP_1102B;
+         
+LED1_G												:= SEL(tgb_IP_1102A_Open, SEL(tgb_IP_1102A_Closed, tgb_Half_Sec_Pulse, FALSE), TRUE); 
+LED1_R												:= NOT LED1_G;
+LED1_Buzzer											:= NOT tgb_IP_1102A_Open AND NOT tgb_IP_1102A_Closed; 
+LED2_G												:= SEL(tgb_IP_1102B_Open, SEL(tgb_IP_1102B_Closed, tgb_Half_Sec_Pulse, FALSE), TRUE); 
+LED2_R												:= NOT LED2_G; 
+LED2_Buzzer											:= NOT tgb_IP_1102B_Open AND NOT tgb_IP_1102B_Closed; 
+
+
+// Lightbar
+IF tgb_Active_Alarm OR NOT tgb_ADS_Active THEN
+	LED3_R											:= tgb_Half_Sec_Pulse;
+	LED3_Y											:= FALSE;
+	LED3_G											:= FALSE;
+ELSIF eState = eReset OR eState = eIdle THEN
+	LED3_R											:= FALSE;
+	LED3_Y											:= TRUE;
+	LED3_G											:= FALSE;
+ELSE
+	LED3_R											:= FALSE;
+	LED3_Y											:= FALSE;
+	LED3_G											:= TRUE;
+END_IF
+
+tgi_Total_Cycle_Count								:= gpdiCycle_Count;
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_Interlocks" Id="{4a1b5ee7-1942-4ef6-99ba-6dc9a05ae1a0}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - A_Interlocks
+// Rev 1.00 - September 19, 2023
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_Modbus_Points" Id="{ff57d850-9c1b-4385-a376-98e3000dceed}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - A_Modbus_Points
+// Rev 1.00 - April 7, 2023
+
+IF iMBPFunction = 0 THEN															// Modbus is not busy
+	IF gbReadMBWeather THEN
+		MBP_Master.UnitID 							:= 1;							// Weather Station Modbus address
+		wMBPAddress									:= 8193;
+		wMBPQuantity								:= 1;
+		bMBPWeather									:= TRUE;
+		iMBPFunction								:= eMBReadRegs;
+	ELSIF gbReadMBInclinometer THEN
+		MBP_Master.UnitID 							:= 80;							// Inclinometer Modbus address
+		wMBPAddress									:= 61;
+		wMBPQuantity								:= 2;
+		bMBPWeather									:= FALSE;
+		iMBPFunction								:= eMBReadRegs;
+	END_IF
+	IF bMBPWeather THEN
+		; 	// Get weather values here
+	ELSE
+		ZXI_2002									:= wMBPReadData[0];
+		ZYI_2002									:= wMBPReadData[1];
+	END_IF
+ELSIF tonMBPReset.Q THEN
+	iMBPFunction									:= eMBIdle;
+END_IF
+tonMBPReset(IN:= iMBPFunction > 0, PT:= MODBUS_TIMEOUT);
+
+CASE iMBPFunction OF
+	
+	eMBIdle:
+		MBP_Master.Execute 							:= FALSE;
+		
+	eMBReadRegs:
+		MBP_Master.ReadRegs(
+			Quantity								:= wMBPQuantity, 
+			MBAddr									:= wMBPAddress, 
+			cbLength								:= SIZEOF(wMBPReadData), 
+			pMemoryAddr								:= ADR(wMBPReadData), 
+			Execute									:= TRUE, 
+			Timeout									:= MODBUS_TIMEOUT, 
+			BUSY									=> bMBPBusy, 
+			Error									=> bMBPError, 
+			ErrorId									=> MBP_Errors, 
+			cbRead									=> uiMBPRead);
+		MBP_Master.ReadRegs(BUSY=> bMBPBusy);
+		IF NOT MBP_Master.BUSY THEN
+			MBP_Master.Execute 						:= FALSE;
+			MBP_Master.ReadRegs(BUSY=> bMBPBusy);
+			IF MBP_Master.Error THEN
+				MBP_Master.ReadRegs();
+			ELSE
+				iMBPFunction 						:= 0;			
+			END_IF
+		END_IF
+	
+	ELSE
+		iMBPFunction 								:= 0;
+	
+END_CASE
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_Modbus_VFD" Id="{971c7ffa-6263-461a-9bde-2999adc04d76}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - A_Modbus_VFD
+// Rev 1.00 - July 3, 2023
+
+MBV_Master.UnitID 									:= 1;														// VFD address is 1
+
+IF iMBVFunction = 0 THEN																						// Modbus is not busy
+	IF gbReadMBVFD THEN
+		gbReadMBVFD									:= FALSE;
+		wMBVAddress									:= MB_VFD_BLOCK_ADDR;										// Read Block parameters
+		wMBVQuantity								:= 4;														// Read status, current frequency, current rpm
+		iMBVFunction								:= eMBReadRegs;
+		bMBVStatusCheck								:= FALSE;
+	END_IF
+	tgb_HS_1102_Enabled								:= (wMBVReadData[0] AND wMBVStatus) <> 0;
+	tgr_HS_1102_RPM									:= WORD_TO_REAL(wMBVReadData[2]);
+	tgr_HS_1102_RPM									:= SEL(tgr_HS_1102_RPM < 20, tgr_HS_1102_RPM, 0);
+	tgr_HS_1102V									:= WORD_TO_REAL(wMBVReadData[1]);
+	tgb_HS_1102_Running								:= tgb_HS_1102_Enabled AND tgr_HS_1102_RPM > 20;
+ELSIF tonMBVReset.Q THEN																						// Reset Modbus routine if still active after timeout
+	iMBVFunction									:= 0;	
+END_IF
+tonMBVReset(IN:= iMBVFunction > 0, PT:= MODBUS_TIMEOUT);
+
+CASE iMBVFunction OF
+	
+	eMBIdle:
+		MBV_Master.Execute 							:= FALSE;
+		
+	eMBReadRegs:
+		MBV_Master.ReadRegs(
+			Quantity								:= wMBVQuantity, 
+			MBAddr									:= wMBVAddress, 
+			cbLength								:= SIZEOF(wMBVReadData), 
+			pMemoryAddr								:= ADR(wMBVReadData), 
+			Execute									:= TRUE, 
+			Timeout									:= MODBUS_TIMEOUT, 
+			BUSY									=> bMBVBusy, 
+			Error									=> bMBVError, 
+			ErrorId									=> MBV_Errors, 
+			cbRead									=> uiMBVRead);
+		MBV_Master.ReadRegs(BUSY=> bMBVBusy);
+		IF NOT MBV_Master.BUSY THEN
+			MBV_Master.Execute 						:= FALSE;
+			MBV_Master.ReadRegs(BUSY=> bMBVBusy);
+			IF MBV_Master.Error THEN
+				MBV_Master.ReadRegs();
+			ELSE
+				iMBVFunction 						:= 0;			
+			END_IF
+		END_IF
+	
+	eMBWriteSingleReg:	
+		MBV_Master.WriteSingleRegister(
+			Quantity								:= wMBVQuantity, 
+			MBAddr									:= wMBVAddress, 
+			cbLength								:= SIZEOF(wMBVWriteData), 
+			pMemoryAddr								:= ADR(wMBVWriteData), 
+			Execute									:= TRUE, 
+			Timeout									:= MODBUS_TIMEOUT, 
+			BUSY									=> bMBVBusy, 
+			Error									=> bMBVError, 
+			ErrorId									=> MBV_Errors, 
+			cbRead									=> uiMBVRead);
+		MBV_Master.WriteSingleRegister(BUSY=> bMBVBusy);
+		IF NOT MBV_Master.BUSY THEN
+			MBV_Master.Execute 						:= FALSE;
+			MBV_Master.WriteSingleRegister(BUSY=> bMBVBusy);
+			IF MBV_Master.Error THEN
+				MBV_Master.WriteSingleRegister();
+			ELSE
+				iMBVFunction 						:= 0;			
+			END_IF
+		END_IF
+
+
+// These are not currently used	
+
+	eMBReadCoils:
+		MBV_Master.ReadCoils(
+			Quantity								:= wMBVQuantity, 
+			MBAddr									:= wMBVAddress, 
+			cbLength								:= SIZEOF(wMBVReadData), 
+			pMemoryAddr								:= ADR(wMBVReadData), 
+			Execute									:= TRUE, 
+			Timeout									:= MODBUS_TIMEOUT, 
+			BUSY									=> bMBVBusy, 
+			Error									=> bMBVError, 
+			ErrorId									=> MBV_Errors, 
+			cbRead									=> uiMBVRead);
+		MBV_Master.ReadCoils(BUSY=> bMBVBusy);
+		IF NOT MBV_Master.BUSY THEN
+			MBV_Master.Execute 						:= FALSE;
+			MBV_Master.ReadCoils(BUSY=> bMBVBusy);
+			IF MBV_Master.Error THEN
+				MBV_Master.ReadCoils();
+			ELSE
+				iMBVFunction 						:= 0;			
+			END_IF
+		END_IF
+	
+	eMBReadInputStatus:
+		MBV_Master.ReadInputStatus(
+			Quantity								:= wMBVQuantity, 
+			MBAddr									:= wMBVAddress, 
+			cbLength								:= SIZEOF(wMBVReadData), 
+			pMemoryAddr								:= ADR(wMBVReadData), 
+			Execute									:= TRUE, 
+			Timeout									:= MODBUS_TIMEOUT, 
+			BUSY									=> bMBVBusy, 
+			Error									=> bMBVError, 
+			ErrorId									=> MBV_Errors, 
+			cbRead									=> uiMBVRead);
+		MBV_Master.ReadInputStatus(BUSY=> bMBVBusy);
+		IF NOT MBV_Master.BUSY THEN
+			MBV_Master.Execute 						:= FALSE;
+			MBV_Master.ReadInputStatus(BUSY=> bMBVBusy);
+			IF MBV_Master.Error THEN
+				MBV_Master.ReadInputStatus();
+			ELSE
+				iMBVFunction 						:= 0;			
+			END_IF
+		END_IF
+	
+	eMBReadInputRegs:
+		MBV_Master.ReadInputRegs(
+			Quantity								:= wMBVQuantity, 
+			MBAddr									:= wMBVAddress, 
+			cbLength								:= SIZEOF(wMBVReadData), 
+			pMemoryAddr								:= ADR(wMBVReadData), 
+			Execute									:= TRUE, 
+			Timeout									:= MODBUS_TIMEOUT, 
+			BUSY									=> bMBVBusy, 
+			Error									=> bMBVError, 
+			ErrorId									=> MBV_Errors, 
+			cbRead									=> uiMBVRead);
+		MBV_Master.ReadInputRegs(BUSY=> bMBVBusy);
+		IF NOT MBV_Master.BUSY THEN
+			MBV_Master.Execute 						:= FALSE;
+			MBV_Master.ReadInputRegs(BUSY=> bMBVBusy);
+			IF MBV_Master.Error THEN
+				MBV_Master.ReadInputRegs();
+			ELSE
+				iMBVFunction 						:= 0;			
+			END_IF
+		END_IF
+	
+	eMBWriteSingleCoil:
+		MBV_Master.WriteSingleCoil(
+			Quantity								:= wMBVQuantity, 
+			MBAddr									:= wMBVAddress, 
+			cbLength								:= SIZEOF(wMBVWriteData), 
+			pMemoryAddr								:= ADR(wMBVWriteData), 
+			Execute									:= TRUE, 
+			Timeout									:= MODBUS_TIMEOUT, 
+			BUSY									=> bMBVBusy, 
+			Error									=> bMBVError, 
+			ErrorId									=> MBV_Errors, 
+			cbRead									=> uiMBVRead);
+		MBV_Master.WriteSingleCoil(BUSY=> bMBVBusy);
+		IF NOT MBV_Master.BUSY THEN
+			MBV_Master.Execute 						:= FALSE;
+			MBV_Master.WriteSingleCoil(BUSY=> bMBVBusy);
+			IF MBV_Master.Error THEN
+				MBV_Master.WriteSingleCoil();
+			ELSE
+				iMBVFunction 						:= 0;			
+			END_IF
+		END_IF
+	
+	eMBWriteMultipleCoils:
+		MBV_Master.WriteMultipleCoils(
+			Quantity								:= wMBVQuantity, 
+			MBAddr									:= wMBVAddress, 
+			cbLength								:= SIZEOF(wMBVWriteData), 
+			pMemoryAddr								:= ADR(wMBVWriteData), 
+			Execute									:= TRUE, 
+			Timeout									:= MODBUS_TIMEOUT, 
+			BUSY									=> bMBVBusy, 
+			Error									=> bMBVError, 
+			ErrorId									=> MBV_Errors, 
+			cbRead									=> uiMBVRead);
+		MBV_Master.WriteMultipleCoils(BUSY=> bMBVBusy);
+		IF NOT MBV_Master.BUSY THEN
+			MBV_Master.Execute 						:= FALSE;
+			MBV_Master.WriteMultipleCoils(BUSY=> bMBVBusy);
+			IF MBV_Master.Error THEN
+				MBV_Master.WriteMultipleCoils();
+			ELSE
+				iMBVFunction 						:= 0;			
+			END_IF
+		END_IF
+	
+	eMBWriteRegs:
+		MBV_Master.WriteRegs(
+			Quantity								:= wMBVQuantity, 
+			MBAddr									:= wMBVAddress, 
+			cbLength								:= SIZEOF(wMBVWriteData), 
+			pMemoryAddr								:= ADR(wMBVWriteData), 
+			Execute									:= TRUE, 
+			Timeout									:= MODBUS_TIMEOUT, 
+			BUSY									=> bMBVBusy, 
+			Error									=> bMBVError, 
+			ErrorId									=> MBV_Errors, 
+			cbRead									=> uiMBVRead);
+		MBV_Master.WriteRegs(BUSY=> bMBVBusy);
+		IF NOT MBV_Master.BUSY THEN
+			MBV_Master.Execute 						:= FALSE;
+			MBV_Master.WriteRegs(BUSY=> bMBVBusy);
+			IF MBV_Master.Error THEN
+				MBV_Master.WriteRegs();
+			ELSE
+				iMBVFunction 						:= 0;			
+			END_IF
+		END_IF
+	
+	ELSE
+		iMBVFunction 								:= 0;
+	
+END_CASE
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_Status_List" Id="{bb3a678e-dd88-4169-a6cd-180f1af2a8df}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - A_Status_List
+// Rev 1.00 - April 23, 2023
+
+strStatusLabel[0] 									:= 'Start Warm Up';
+strStatusLabel[1] 									:= 'Warm Up running';
+strStatusLabel[2]  									:= 'Start Reactor Reset';
+strStatusLabel[3]  									:= 'System ready';
+strStatusLabel[4]  									:= 'Evacuation running';
+strStatusLabel[5]  									:= 'Steam Bypass running';
+strStatusLabel[6]  									:= 'Repressurization running';
+strStatusLabel[7]  									:= 'Desorption running';
+strStatusLabel[8]  									:= 'Adsorption running';
+strStatusLabel[9]  									:= '';
+strStatusLabel[10]  								:= 'Stopping process';
+strStatusLabel[11]  								:= 'Stopping Warm Up';
+strStatusLabel[12]  								:= 'Stopping Evacuation';
+strStatusLabel[13]  								:= 'Stopping Steam Bypass';
+strStatusLabel[14]  								:= 'Stopping Repressurization';
+strStatusLabel[15]  								:= 'Stopping Desorption';
+strStatusLabel[16]  								:= 'Stopping Adsorption';
+strStatusLabel[17]  								:= '';
+strStatusLabel[18]  								:= 'Cycle Error';
+strStatusLabel[19]  								:= '';
+strStatusLabel[20]  								:= '';
+strStatusLabel[21]  								:= 'Fan Test Running';
+strStatusLabel[22]  								:= 'Evacuation Error!';
+strStatusLabel[23]  								:= 'Steam Bypass Error!';
+strStatusLabel[24]  								:= 'Repressurization Error!';
+strStatusLabel[25]  								:= 'Desorption Error!';
+strStatusLabel[26]  								:= 'Adsorption Error!';
+strStatusLabel[27]  								:= '';
+strStatusLabel[28]  								:= '';
+strStatusLabel[29]  								:= '';
+strStatusLabel[30]  								:= 'Evacuation Complete';
+strStatusLabel[31]  								:= 'Steam Bypass Complete';
+strStatusLabel[32]  								:= 'Repressurization Complete';
+strStatusLabel[33]  								:= 'Desoprtion Complete';
+strStatusLabel[34]  								:= 'Adsorption Complete';
+	
+bStatusListLoaded									:= true;]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_Temperatures" Id="{3897b01a-8467-48d3-9794-116af3d0b239}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - A_Temperatures
+// Rev 1.00 - June 26, 2023
+
+tgr_TI_1001											:= F_Temperature(TI_1001);
+tgb_TI_1001_Error									:= TI_1001_Error;
+//bTI_1001_ErrActive									:= SEL(TI_1001_Error, FALSE, bTI_1001_ErrActive);
+//gbAlarms[eTC_Alarm]									:= SEL(TI_1001_Error, gbAlarms[eTC_Alarm], TRUE);
+                                    				
+tgr_TI_1100A										:= F_Temperature(TI_1100A);
+tgb_TI_1100A_Error									:= TI_1100A_Error;
+//bTI_1100A_ErrActive									:= SEL(TI_1100A_Error, FALSE, bTI_1100A_ErrActive);
+//gbAlarms[eTC_Alarm]									:= SEL(TI_1100A_Error, gbAlarms[eTC_Alarm], TRUE);
+                                    				
+tgr_TI_1100B										:= F_Temperature(TI_1100B);
+tgb_TI_1100B_Error									:= TI_1100B_Error;
+//bTI_1100B_ErrActive									:= SEL(TI_1100B_Error, FALSE, bTI_1100B_ErrActive);
+//gbAlarms[eTC_Alarm]									:= SEL(TI_1100B_Error, gbAlarms[eTC_Alarm], TRUE);
+
+tgr_TI_1100C										:= F_Temperature(TI_1100C);
+tgb_TI_1100C_Error									:= TI_1100C_Error;
+//bTI_1100C_ErrActive									:= SEL(TI_1100C_Error, FALSE, bTI_1100C_ErrActive);
+//gbAlarms[eTC_Alarm]									:= SEL(TI_1100C_Error, gbAlarms[eTC_Alarm], TRUE);
+                                    				
+tgr_TI_1101											:= F_Temperature(TI_1101);
+tgb_TI_1101_Error									:= TI_1101_Error;
+//bTI_1101_ErrActive									:= SEL(TI_1101_Error, FALSE, bTI_1101_ErrActive);
+//gbAlarms[eTC_Alarm]									:= SEL(TI_1101_Error, gbAlarms[eTC_Alarm], TRUE);
+                                    				
+tgr_TI_1102A										:= F_Temperature(TI_1102A);
+tgb_TI_1102A_Error									:= TI_1102A_Error;
+//bTI_1102A_ErrActive									:= SEL(TI_1102A_Error, FALSE, bTI_1102A_ErrActive);
+//gbAlarms[eTC_Alarm]									:= SEL(TI_1102A_Error, gbAlarms[eTC_Alarm], TRUE);
+                                    				
+tgr_TI_1102B										:= F_Temperature(TI_1102B);
+tgb_TI_1102B_Error									:= TI_1102B_Error;
+//bTI_1102B_ErrActive									:= SEL(TI_1102B_Error, FALSE, bTI_1102B_ErrActive);
+//gbAlarms[eTC_Alarm]									:= SEL(TI_1102B_Error, gbAlarms[eTC_Alarm], TRUE);
+                                    				
+tgr_TI_1103											:= F_Temperature(TI_1103);
+tgb_TI_1103_Error									:= TI_1103_Error;
+//bTI_1103_ErrActive									:= SEL(TI_1103_Error, FALSE, bTI_1103_ErrActive);
+//gbAlarms[eTC_Alarm]									:= SEL(TI_1103_Error, gbAlarms[eTC_Alarm], TRUE);
+                                    				
+tgr_TI_1104											:= F_Temperature(TI_1104);
+tgb_TI_1104_Error									:= TI_1104_Error;
+//bTI_1104_ErrActive									:= SEL(TI_1104_Error, FALSE, bTI_1104_ErrActive);
+//gbAlarms[eTC_Alarm]									:= SEL(TI_1104_Error, gbAlarms[eTC_Alarm], TRUE);
+                                    				
+tgr_TI_1105											:= F_Temperature(TI_1105);
+tgb_TI_1105_Error									:= TI_1105_Error;
+//bTI_1105_ErrActive									:= SEL(TI_1105_Error, FALSE, bTI_1105_ErrActive);
+//gbAlarms[eTC_Alarm]									:= SEL(TI_1105_Error, gbAlarms[eTC_Alarm], TRUE);
+                                    				
+tgr_TI_1106											:= F_Temperature(TI_1106);
+tgb_TI_1106_Error									:= TI_1106_Error;
+//bTI_1106_ErrActive									:= SEL(TI_1106_Error, FALSE, bTI_1106_ErrActive);
+//gbAlarms[eTC_Alarm]									:= SEL(TI_1106_Error, gbAlarms[eTC_Alarm], TRUE);
+                                    				
+tgr_TI_1301											:= F_Temperature(TI_1301);
+tgb_TI_1301_Error									:= TI_1301_Error;
+//bTI_1301_ErrActive									:= SEL(TI_1301_Error, FALSE, bTI_1301_ErrActive);
+//gbAlarms[eTC_Alarm]									:= SEL(TI_1301_Error, gbAlarms[eTC_Alarm], TRUE);
+
+tgr_TI_1302											:= F_Temperature(TI_1302);
+tgb_TI_1302_Error									:= TI_1302_Error;
+//bTI_1302_ErrActive									:= SEL(TI_1302_Error, FALSE, bTI_1302_ErrActive);
+//gbAlarms[eTC_Alarm]									:= SEL(TI_1302_Error, gbAlarms[eTC_Alarm], TRUE);
+                                    	
+tgr_TI_1303											:= F_Temperature(TI_1303);
+tgb_TI_1303_Error									:= TI_1303_Error;
+//bTI_1303_ErrActive									:= SEL(TI_1303_Error, FALSE, bTI_1303_ErrActive);
+//gbAlarms[eTC_Alarm]									:= SEL(TI_1303_Error, gbAlarms[eTC_Alarm], TRUE);
+                                    				
+tgr_TI_1304											:= F_Temperature(TI_1304);
+tgb_TI_1304_Error									:= TI_1304_Error;
+//bTI_1304_ErrActive									:= SEL(TI_1304_Error, FALSE, bTI_1304_ErrActive);
+//gbAlarms[eTC_Alarm]									:= SEL(TI_1304_Error, gbAlarms[eTC_Alarm], TRUE);
+                                    	
+tgr_TI_1											:= F_Temperature(TI_1);
+tgb_TI_1_Error										:= TI_1_Error;
+
+tgr_TI_2											:= F_Temperature(TI_2);
+tgb_TI_2_Error										:= TI_2_Error;
+
+tgr_TI_3											:= F_Temperature(TI_3);
+tgb_TI_3_Error										:= TI_3_Error;
+
+tgr_TI_4											:= F_Temperature(TI_4);
+tgb_TI_4_Error										:= TI_4_Error;
+
+tgr_TI_5											:= F_Temperature(TI_5);
+tgb_TI_5_Error										:= TI_5_Error;
+
+tgr_TI_6											:= F_Temperature(TI_6);
+tgb_TI_6_Error										:= TI_6_Error;
+
+tgr_TI_7											:= F_Temperature(TI_7);
+tgb_TI_7_Error										:= TI_7_Error;
+
+tgr_TI_8											:= F_Temperature(TI_8);
+tgb_TI_8_Error										:= TI_8_Error;
+
+tgr_TI_9											:= F_Temperature(TI_9);
+tgb_TI_9_Error										:= TI_9_Error;
+
+tgr_TI_10											:= F_Temperature(TI_10);
+tgb_TI_10_Error										:= TI_10_Error;
+
+tgr_TI_11											:= F_Temperature(TI_11);
+tgb_TI_11_Error										:= TI_11_Error;
+
+tgr_TI_12											:= F_Temperature(TI_12);
+tgb_TI_12_Error										:= TI_12_Error;
+
+(*
+IF gbAlarms[eTC_Alarm] AND NOT tgb_Active_Alarm THEN
+	IF TI_1001_Error AND NOT bTI_1001_ErrActive AND giActiveAlarm = 0 THEN
+		bTI_1001_ErrActive							:= TRUE;
+		gsTempAlarm									:= '/ TI_1001';
+		giActiveAlarm								:= eTC_Alarm;
+	ELSIF TI_1100A_Error AND NOT bTI_1100A_ErrActive AND giActiveAlarm = 0 THEN
+		bTI_1100A_ErrActive							:= TRUE;
+		gsTempAlarm									:= '/ TI_1100A';
+		giActiveAlarm								:= eTC_Alarm;
+	ELSIF TI_1100B_Error AND NOT bTI_1100B_ErrActive AND giActiveAlarm = 0 THEN
+		bTI_1100B_ErrActive							:= TRUE;
+		gsTempAlarm									:= '/ TI_1100B';
+		giActiveAlarm								:= eTC_Alarm;
+	ELSIF TI_1100C_Error AND NOT bTI_1100C_ErrActive AND giActiveAlarm = 0 THEN
+		bTI_1100C_ErrActive							:= TRUE;
+		gsTempAlarm									:= '/ TI_1100C';
+		giActiveAlarm								:= eTC_Alarm;
+	ELSIF TI_1101_Error AND NOT bTI_1101_ErrActive AND giActiveAlarm = 0 THEN
+		bTI_1101_ErrActive							:= TRUE;
+		gsTempAlarm									:= '/ TI_1101';
+		giActiveAlarm								:= eTC_Alarm;
+	ELSIF TI_1102A_Error AND NOT bTI_1102A_ErrActive AND giActiveAlarm = 0 THEN
+		bTI_1102A_ErrActive							:= TRUE;
+		gsTempAlarm									:= '/ TI_1102A';
+		giActiveAlarm								:= eTC_Alarm;
+	ELSIF TI_1102B_Error AND NOT bTI_1102B_ErrActive AND giActiveAlarm = 0 THEN
+		bTI_1102B_ErrActive							:= TRUE;
+		gsTempAlarm									:= '/ TI_1102B';
+		giActiveAlarm								:= eTC_Alarm;
+	ELSIF TI_1103_Error AND NOT bTI_1103_ErrActive AND giActiveAlarm = 0 THEN
+		bTI_1103_ErrActive							:= TRUE;
+		gsTempAlarm									:= '/ TI_1103';
+		giActiveAlarm								:= eTC_Alarm;
+	ELSIF TI_1104_Error AND NOT bTI_1104_ErrActive AND giActiveAlarm = 0 THEN
+		bTI_1104_ErrActive							:= TRUE;
+		gsTempAlarm									:= '/ TI_1104';
+		giActiveAlarm								:= eTC_Alarm;
+	ELSIF TI_1105_Error AND NOT bTI_1105_ErrActive AND giActiveAlarm = 0 THEN
+		bTI_1105_ErrActive							:= TRUE;
+		gsTempAlarm									:= '/ TI_1105';
+		giActiveAlarm								:= eTC_Alarm;
+	ELSIF TI_1106_Error AND NOT bTI_1106_ErrActive AND giActiveAlarm = 0 THEN
+		bTI_1106_ErrActive							:= TRUE;
+		gsTempAlarm									:= '/ TI_1106';
+		giActiveAlarm								:= eTC_Alarm;
+	ELSIF TI_1301_Error AND NOT bTI_1301_ErrActive AND giActiveAlarm = 0 THEN
+		bTI_1301_ErrActive							:= TRUE;
+		gsTempAlarm									:= '/ TI_1301';
+		giActiveAlarm								:= eTC_Alarm;
+	ELSIF TI_1302_Error AND NOT bTI_1302_ErrActive AND giActiveAlarm = 0 THEN
+		bTI_1302_ErrActive							:= TRUE;
+		gsTempAlarm									:= '/ TI_1302';
+		giActiveAlarm								:= eTC_Alarm;
+	ELSIF TI_1303_Error AND NOT bTI_1303_ErrActive AND giActiveAlarm = 0 THEN
+		bTI_1303_ErrActive							:= TRUE;
+		gsTempAlarm									:= '/ TI_1303';
+		giActiveAlarm								:= eTC_Alarm;
+	ELSIF TI_1304_Error AND NOT bTI_1304_ErrActive AND giActiveAlarm = 0 THEN
+		bTI_1304_ErrActive							:= TRUE;
+		gsTempAlarm									:= '/ TI_1304';
+		giActiveAlarm								:= eTC_Alarm;
+	END_IF
+END_IF
+*)
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_WaterHandling" Id="{12980a2e-3d4c-4af7-948a-e78b36375958}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - A_WaterHandling
+// Rev 1.00 - September 21, 2023
+
+IF bDrainOn OR tgb_Drains_On THEN
+	
+	tgb_HS_1200										:= NOT b1200DrainOROff;		//*** Interlock with error
+	
+	IF tgb_HS_1201_LSH OR (bClearDrains AND tgb_HS_1201_LSL) THEN															// 7/14/23 PS - Adsorption process change
+		b1201DrainOn								:= TRUE;
+	END_IF
+	IF NOT tgb_HS_1201_LSL THEN
+		b1201DrainOn								:= FALSE;
+	END_IF
+	tgb_HS_1201										:= b1201DrainOn AND (tgb_Drains_On OR NOT b1201DrainOROff);
+
+	IF tgb_HS_1202_LSH OR (bClearDrains AND tgb_HS_1202_LSL) THEN															// 7/14/23 PS - Adsorption process change
+		b1202DrainOn								:= TRUE;
+	END_IF
+	IF NOT tgb_HS_1202_LSL THEN
+		b1202DrainOn								:= FALSE;
+	END_IF
+	tgb_HS_1202										:= b1300DrainOn OR b1202DrainOROn OR b1202DrainOn AND (tgb_Drains_On OR NOT b1202DrainOROff);
+	tgb_HS_1300B									:= b1300DrainOn;
+	
+END_IF
+
+rtrigDrainsOff(CLK:= NOT bDrainOn AND NOT tgb_Drains_On);																	// 09/20/23 PS
+IF rtrigDrainsOff.Q THEN																									// 09/20/23 PS
+	tgb_HS_1200										:= FALSE;
+	tgb_HS_1201										:= FALSE;
+	tgb_HS_1202										:= FALSE;
+	tgb_HS_1300B									:= FALSE;
+END_IF
+
+bDrainLSHClear										:= NOT tgb_HS_1202_LSH AND NOT tgb_HS_1201_LSH;
+bDrainLSLClear										:= NOT tgb_HS_1202_LSL AND NOT tgb_HS_1201_LSL; 
+
+bCondenserLow										:= tgr_LI_1204 < CONDENSER_LEVEL_LOW_LIMIT;								// 09/19/23 PS
+bCondenserFull										:= tgr_LI_1204 > CONDENSER_LEVEL_HIGH_LIMIT;							// 09/21/23 PS
+bCondenserRefill									:= tgr_LI_1204 < CONDENSER_LEVEL_REFILL AND NOT bCondenserLow;			// 09/21/23 PS
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A0_Reset" Id="{c136879f-5e5e-46e9-b524-e0ad407f7722}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - A0_Reset
+// Rev 1.00 - September 21, 2023
+
+tgr_HS_1102											:= 0;
+tgr_IP_1102A										:= 0;
+tgr_IP_1102B										:= 0;
+tgr_IP_1101											:= 0;
+tgr_IP_1302B										:= 0;
+tgb_YL_1001											:= FALSE;
+tgb_HS_1107											:= FALSE;				
+tgb_HS_1101A										:= FALSE;
+tgb_HS_1101B										:= FALSE;
+tgb_AI_1102A_Pump									:= FALSE;
+tgb_AI_1102A_Solenoid								:= FALSE;													
+tgb_AI_1102B_Pump									:= FALSE;
+tgb_AI_1102B_Solenoid								:= FALSE;													
+tgb_HS_1103A										:= FALSE;				
+tgb_HS_1103B										:= FALSE;				
+tgb_HS_1104											:= FALSE;				
+tgb_HS_1203											:= FALSE;				
+tgb_HS_1302A										:= FALSE;				
+tgb_HS_1301A										:= FALSE;				
+tgb_HS_1301											:= FALSE;				
+tgb_HS_1301B										:= FALSE;			
+tgb_HS_1300A										:= FALSE;			
+tgb_HS_1300B										:= FALSE;				
+tgb_HS_1305											:= FALSE;
+tgb_SV_1201											:= FALSE;
+tgb_HT_1_On											:= FALSE;
+tgb_HT_2_On											:= FALSE;
+tgb_HT_3_On											:= FALSE;
+tgb_HT_4_On											:= FALSE;
+tgb_HT_5_On											:= FALSE;
+tgb_HT_6_On											:= FALSE;
+b1201DrainOROff										:= FALSE;
+b1202DrainOROff										:= FALSE;
+b1202DrainOROn										:= FALSE;
+b1300DrainOn										:= FALSE;
+bRunValveModulation									:= FALSE;
+tgi_Current_Step									:= 0;
+strProcessError										:= '';
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A1_WarmUp" Id="{32d9262c-7d46-47e5-9d8d-98b8ede08899}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - A1_WarmUp
+// Rev 1.00 - September 22, 2023
+
+CASE i1Step OF
+
+	0:	;
+	
+	1:	
+		A0_Reset();
+		tgb_AI_1102A_Pump							:= TRUE;
+		tgb_AI_1102B_Pump							:= TRUE;
+		rTime1										:= VACUUM_TANK_DRAIN_TIME * SECONDS;
+		strError									:= gsTK1300HighLevel;
+		i1Step										:= i1Step + 1;
+
+	2:	
+		bTimer1										:= TRUE;
+		IF tgb_HS_1300A_LSH THEN
+			b1300DrainOn							:= TRUE;
+		ELSE
+			bTimer1									:= FALSE;
+			b1300DrainOn							:= FALSE;
+			IF bCondenserRefill THEN
+				rTime2								:= 20 * SECONDS;
+				tgb_SV_1201							:= TRUE;
+				i1Step								:= i1Step + 1;
+			ELSE
+				rTime1								:= 10 * MINUTES;
+				strError							:= gsBoilerPressureLow;
+				i1Step								:= i1Step + 2;
+			END_IF
+		END_IF
+		
+	3:
+		bTimer2										:= TRUE;
+		IF tonTimer2.Q OR bCondenserFull THEN
+			bTimer2									:= FALSE;
+			tgb_SV_1201								:= FALSE;		
+			rTime1									:= 10 * MINUTES;
+			strError								:= gsBoilerPressureLow;
+			i1Step									:= i1Step + 1;
+		END_IF
+
+	4:	
+		bTimer1										:= TRUE;
+		tgb_YL_1001									:= TRUE;
+		IF tgr_PI_1001 > tgr_SP_Boiler_Pressure THEN
+			bTimer1									:= FALSE;
+			tgb_YL_1001								:= FALSE;
+			tgb_Warmup_Complete						:= TRUE;
+			i1Step									:= i1Step + 1;
+		END_IF
+
+	5:	
+		bWarmUpDone									:= TRUE;
+		tgi_Current_Step							:= 0;
+		i1Step										:= 0;
+	
+END_CASE
+
+strProcessError										:= SEL(bCondenserLow, strProcessError, gsLowCondenserLevel);					// 09/21/23 PS
+
+IF i1Step > 0 THEN
+	IF tonTimer1.Q OR tgb_Stop_Cycle OR strProcessError <> '' THEN
+		giActiveAlarm 								:= SEL(tgb_Stop_Cycle, eWarmup_Alarm, eNo_Alarms);
+		strError									:= SEL(strProcessError <> '', strError, strProcessError);
+		iStep										:= i1Step;		
+		A_ClearProcess();
+		A0_Reset();
+		i1Step										:= 5;
+	END_IF
+	tgi_Current_Step								:= i1Step;
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A2_Evacuation" Id="{7e8ec2c0-0aed-498e-af66-4b5f80a042ad}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - A2_Evacuation
+// Rev 1.00 -September 22, 2023
+
+CASE i2Step OF
+	
+	0:	;
+	
+	1:	
+		A0_Reset();
+		tgb_AI_1102A_Pump							:= TRUE;
+		tgb_AI_1102B_Pump							:= TRUE;
+		gbVacuumHolding								:= FALSE;
+		rTime1										:= 30 * SECONDS;
+		i2Step										:= 2;
+				
+	2:	
+		IF bDrainLSHClear THEN
+			strError								:= gsValvesNotClosed;
+			i2Step									:= 4;
+		ELSE
+			strError								:= gsDrainNotClear;
+			i2Step									:= i2Step + 1;
+		END_IF
+	
+	3:	
+		bTimer1										:= TRUE;
+		IF bDrainLSHClear AND bDrainLSLClear THEN
+			bTimer1									:= FALSE;
+			strError								:= gsValvesNotClosed;
+			i2Step									:= i2Step + 1;
+		END_IF
+
+	4:	
+		bTimer1										:= TRUE;
+		IF gbHS_1102ValvesClosed THEN
+			bTimer1									:= FALSE;
+			rTime1									:= DEFAULT_STEP_TIME;
+			strError								:= gsLRPCoolingFlowLow;
+			i2Step									:= i2Step + 1;
+		END_IF
+	
+	5:	
+		bTimer1										:= TRUE;
+		IF tgb_HS_1300A_LSL AND NOT tgb_HS_1300A_LSH THEN
+			tgb_HS_1300A							:= TRUE;
+			tgb_HS_1305								:= TRUE;
+			tgb_HS_1301								:= TRUE;			
+			bTimer1									:= FALSE;
+			rTime2									:= 5 * SECONDS;
+			i2Step									:= i2Step + 1;
+		END_IF
+		
+	6:	
+		bTimer2										:= TRUE;
+		IF tonTimer2.Q THEN
+			bTimer2									:= FALSE;
+			rTime1									:= DEFAULT_STEP_TIME;
+			rSP1									:= tgr_SP_Min_LRP_Cooling_Loop_Flow;
+			strError								:= gsLRPCoolingFlowLow;
+			i2Step									:= i2Step + 1;
+		END_IF
+	
+	7:	
+		bTimer1										:= TRUE;
+		IF tgr_FI_1300 > rSP1 THEN
+			bTimer1									:= FALSE;
+			rTime1									:= DEFAULT_STEP_TIME;
+			strError								:= gsDrainNotClear;
+			i2Step									:= i2Step + 1;
+		END_IF			
+
+	8:	
+		bTimer1										:= TRUE;
+		IF bDrainLSHClear THEN
+			b1201DrainOROff							:= TRUE;
+			b1202DrainOROff							:= TRUE;
+			bTimer1									:= FALSE;
+			rTime1									:= DEFAULT_STEP_TIME;
+			rSP1									:= tgr_SP_Evacuation_Target_Pressure;
+			strError								:= gsTargetPressureHigh;
+			i2Step									:= i2Step + 1;
+		END_IF
+		
+	9:	
+		bTimer1										:= TRUE;
+		IF tgr_PI_1300 < rSP1 THEN
+			tgb_HS_1302A							:= TRUE;
+			tgb_HS_1107								:= TRUE;
+			bTimer1									:= FALSE;
+			rTime2									:= 10 * SECONDS;
+			i2Step									:= i2Step + 1;
+		END_IF
+
+	10:	
+		bTimer2										:= TRUE;
+		IF tonTimer2.Q THEN
+			bTimer2									:= FALSE;
+			rTime1									:= DEFAULT_STEP_TIME;
+			rSP1									:= tgr_SP_Evacuation_Target_Pressure;
+			strError								:= gsTargetPressureHigh;
+			i2Step									:= i2Step + 1;
+		END_IF
+	
+	11:	
+		bTimer1										:= TRUE;
+		IF tgr_PI_1300 <= rSP1 THEN
+			bTimer1									:= FALSE;
+			tgb_HS_1103A							:= TRUE;
+			tgb_HS_1103B							:= TRUE;
+			rTime2									:= 10 * SECONDS;
+			i2Step									:= i2Step + 1;
+		END_IF
+		
+	12:	
+		bTimer2										:= TRUE;
+		IF tonTimer2.Q THEN
+			bTimer2									:= FALSE;
+			rTime1									:= 5 * MINUTES;
+			rSP1									:= tgr_SP_Evacuation_Target_Pressure;
+			i2Step									:= i2Step + 1;
+		END_IF
+	
+   	13:	
+		bTimer1										:= TRUE;
+		bInRange1									:= tgr_PI_1300 < rSP1;
+		bInRange2									:= tgr_PI_1100 <= rSP1;
+		strError									:= SEL(bInRange1, gsPI_1300OutOfRange, gsPI_1100OutOfRange);
+		IF bInRange1 AND bInRange2 THEN
+			bTimer1									:= FALSE;
+			tgb_HS_1103A							:= FALSE;
+ 	  		tgb_HS_1103B							:= FALSE;
+			tgb_HS_1302A							:= FALSE;
+			tgb_HS_1301								:= FALSE;
+			tgb_HS_1300A							:= FALSE;
+			tgb_HS_1305								:= FALSE;
+			tgb_HS_1107								:= FALSE;
+			rPI_1100_Save							:= tgr_PI_1100;
+			rTime2									:= tgr_SP_Leak_Check_Time * SECONDS;
+			i2Step									:= i2Step + 1;
+		END_IF
+
+	14:	
+		bTimer2										:= TRUE;
+		IF tonTimer2.Q THEN
+			bTimer2									:= FALSE;
+			rTime1									:= SECONDS;
+			rSP1									:= tgr_SP_Max_Allowed_Pressure_Leakage;
+			strError								:= gsVacuumLeak;
+			i2Step									:= i2Step + 1;
+		END_IF
+	
+	15:	
+		bTimer1										:= TRUE;
+		IF ABS(tgr_PI_1100 - rPI_1100_Save) <= rSP1 THEN
+			bTimer1									:= FALSE;
+			gbVacuumHolding							:= TRUE;
+			i2Step									:= i2Step + 1;
+		END_IF
+
+	16:	
+		b1201DrainOROff								:= FALSE;
+		b1202DrainOROff								:= FALSE;
+		bEvacuationDone								:= TRUE;
+		tgi_Current_Step							:= 0;
+		i2Step										:= 0;
+		
+END_CASE
+		
+IF i2Step > 0 THEN
+	IF tonTimer1.Q OR tgb_Stop_Cycle OR strProcessError <> '' THEN
+		giActiveAlarm 								:= SEL(tgb_Stop_Cycle, eEvacuation_Alarm, eNo_Alarms);
+		strError									:= SEL(strProcessError <> '', strError, strProcessError);
+		iStep										:= i2Step;		
+		A_ClearProcess();
+		A0_Reset();
+		i2Step										:= 16;
+	END_IF
+	tgi_Current_Step								:= i2Step;
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A3_SteamBypass" Id="{4060554d-2dca-4c04-8201-c926872d1d74}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - A3_SteamBypass
+// Rev 1.00 - September 22, 2023
+
+CASE i3Step OF
+	
+	0:	;
+
+	1:	
+		A0_Reset();
+		tgb_AI_1102A_Pump							:= TRUE;
+		tgb_AI_1102B_Pump							:= TRUE;
+		YL_1001										:= TRUE;
+		rTime1										:= VACUUM_TANK_DRAIN_TIME * SECONDS;
+		strError									:= gsTK1300HighLevel;
+		i3Step										:= i3Step + 1;
+
+	2:	
+		bTimer1										:= TRUE;
+		IF tgb_HS_1300A_LSH THEN
+			b1300DrainOn							:= TRUE;
+		ELSE
+			bTimer1									:= FALSE;
+			b1300DrainOn							:= FALSE;
+			IF bCondenserRefill THEN
+				rTime2								:= 20 * SECONDS;
+				i3Step								:= i3Step + 1;
+			ELSE
+				rTime1								:= 3 * MINUTES;
+				strError							:= gsBoilerPressureLow;
+				i3Step								:= i3Step + 2;
+			END_IF
+		END_IF
+		
+	3:
+		bTimer1										:= TRUE;
+		IF NOT bCondenserRefill OR bCondenserFull THEN
+			bTimer1									:= FALSE;
+			tgb_SV_1201								:= FALSE;		
+			tgb_YL_1001								:= TRUE;
+			b1201DrainOROff							:= TRUE;
+			rTime1									:= 3 * MINUTES;
+			i3Step									:= i3Step + 1;
+		ELSE
+			tgb_SV_1201								:= TRUE;
+		END_IF
+		
+	4:	
+		bTimer1										:= TRUE;
+		strError									:= SEL(tgr_PI_1101 >= tgr_SP_Evacuation_Target_Pressure_Steam, gsBoilerPressureLow, gsTargetPressureHigh);
+		IF tgr_PI_1101 < tgr_SP_Evacuation_Target_Pressure_Steam AND tgr_PI_1001 >= tgr_SP_Boiler_Pressure THEN
+			bTimer1									:= FALSE;
+			b1202DrainOROn							:= TRUE;
+			tgb_HS_1203								:= TRUE;
+			tgr_IP_1101								:= 100;
+			tgb_HS_1107								:= TRUE;
+			rTime2									:= 60 * SECONDS;
+			i3Step									:= i3Step + 1;
+		END_IF
+	
+	5:	
+		bTimer2										:= TRUE;
+		IF tonTimer2.Q THEN
+			bTimer2									:= FALSE;
+			rTime1									:= 3 * MINUTES;
+			strError								:= gsSteamFlowLow;
+			i3Step									:= i3Step + 1;
+		END_IF
+		
+	6:	
+		bTimer1										:= TRUE;
+		IF tgr_FI_1001 > tgr_SP_Min_Bypass_Steam_Flow THEN
+			bTimer1									:= FALSE;
+			rTime2									:= 30 * SECONDS;
+			i3Step									:= i3Step + 1;
+		END_IF
+		
+	7:	
+		bTimer2										:= TRUE;
+		IF tonTimer2.Q THEN
+			bTimer2									:= FALSE;
+			rTime1									:= 5 * MINUTES;
+			strError								:= gsSteamTempLow;
+			i3Step									:= i3Step + 1;
+		END_IF
+	
+	8:	
+		bTimer1										:= TRUE;
+		strProcessError								:= SEL(tgb_TI_1101_Error, strProcessError, gsTI_1101Error);					// 09/20/23 PS
+		IF tgr_TI_1101 > tgr_SP_Min_Bypass_Steam_Temp THEN
+			bTimer1									:= FALSE;
+			tgr_IP_1101								:= 0;
+			tgb_HS_1107								:= FALSE;
+			rTime1									:= 10 * MINUTES;
+			strError								:= gsLimitSwitchError;
+			i3Step									:= i3Step + 1;
+		END_IF
+		
+	9:	
+		bTimer1										:= TRUE;
+		IF NOT tgb_HS_1202_LSH THEN
+			bTimer1									:= FALSE;
+			b1202DrainOROff							:= TRUE;
+			b1202DrainOROn							:= FALSE;
+			tgb_HS_1203								:= FALSE;
+			i3Step									:= i3Step + 1;
+		END_IF
+		
+	10:	
+		bSteamBypassDone							:= TRUE;
+		tgi_Current_Step							:= 0;
+		i3Step										:= 0;
+		
+END_CASE
+		
+strProcessError										:= SEL(bCondenserLow, strProcessError, gsLowCondenserLevel);					// 09/20/23 PS
+
+IF i3Step > 0 THEN
+	IF tonTimer1.Q OR tgb_Stop_Cycle OR strProcessError <> '' THEN
+		giActiveAlarm 								:= SEL(tgb_Stop_Cycle, eSteamBypass_Alarm, eNo_Alarms);
+		strError									:= SEL(strProcessError <> '', strError, strProcessError);		
+		iStep										:= i3Step;		
+		A_ClearProcess();
+		A0_Reset();
+		i3Step										:= 10;
+	END_IF
+	tgi_Current_Step								:= i3Step;
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A4_Desorption" Id="{2c0aea69-19df-41da-a16d-2ca39bdfbf2d}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - A4_Desorption
+// Rev 1.00 - September 22, 2023
+
+CASE i4Step OF
+	
+	0:	bOverTemp									:= FALSE;
+		
+	1:	
+		A0_Reset();
+		YL_1001										:= TRUE;
+		b1201DrainOROff								:= TRUE;
+		b1202DrainOROff								:= TRUE;
+		rTime1										:= 2 * SECONDS;
+		rSP1										:= tgr_SP_Evacuation_Target_Pressure_Steam;								// 07/14/23 PS - Added set point
+		strError									:= gsTargetPressureHigh;
+		i4Step										:= 2;
+	
+	2:	
+		bTimer1										:= TRUE;
+		IF tgr_PI_1100 < rSP1 THEN
+			bTimer1									:= FALSE;
+			i4Step									:= i4Step + 1;
+		END_IF
+		
+	3:	
+		IF gbVacuumHolding THEN
+			rTime1									:= DEFAULT_STEP_TIME;
+			rSP1									:= tgr_SP_Evacuation_Target_Pressure_Steam;								// 07/14/23 PS - Added set point
+			rSP2									:= tgr_SP_Boiler_Pressure;
+			i4Step									:= 6;
+		ELSE
+			rTime2									:= tgr_SP_Leak_Check_Time * SECONDS;
+			i4Step									:= i4Step + 1;
+		END_IF
+		
+	4:	
+		bTimer2										:= TRUE;
+		IF tonTimer2.Q THEN
+			bTimer2									:= FALSE;
+			rTime1									:= 1 * SECONDS;
+			rSP1									:= tgr_SP_Max_Allowed_Pressure_Leakage;
+			strError								:= gsVacuumLeak;
+			i4Step									:= i4Step + 1;
+		END_IF
+
+	5:	
+		bTimer1										:= TRUE;
+		IF ABS(tgr_PI_1100 - rPI_1100_Save) <= rSP1 THEN
+			bTimer1									:= FALSE;
+			gbVacuumHolding							:= TRUE;
+			rTime1									:= 10 * MINUTES;
+			rSP1									:= tgr_SP_Evacuation_Target_Pressure_Steam;								// 07/14/23 PS - Added set point
+			rSP2									:= tgr_SP_Boiler_Pressure;
+			i4Step									:= i4Step + 1;
+		END_IF
+
+	6:	
+		bTimer1										:= TRUE;
+		bInRange1									:= tgr_PI_1100 < rSP1;
+		bInRange2									:= tgr_PI_1001 >= rSP2;
+		strError									:= SEL(bInRange1, gsTargetPressureHigh, gsBoilerPressureLow);
+		IF bInRange1 AND bInRange2 THEN
+			bTimer1									:= FALSE;
+			rTime2									:= 5 * SECONDS;
+			i4Step									:= i4Step + 1;
+		END_IF
+		
+	7:	
+		bTimer2										:= TRUE;
+		tgr_IP_1101									:= tgr_SP_Steam_Valve_Percent_Open;
+		IF tonTimer2.Q THEN
+			bTimer2									:= FALSE;
+			rTime1									:= DEFAULT_STEP_TIME;
+			strError								:= gsValveOutOfRange;
+			i4Step									:= i4Step + 1;
+		END_IF
+		
+	8:	
+		bTimer1										:= TRUE;
+		bInRange1									:= ABS(tgr_ZT_1101 - tgr_IP_1101) <= 5;
+ 		IF bInRange1 THEN
+			bTimer1									:= FALSE;
+			tgb_HS_1101A							:= TRUE;
+			tgb_HS_1101B							:= TRUE;
+			rTime1									:= 10 * MINUTES;
+			strError								:= gsReactorPressureLow;
+			i4Step									:= i4Step + 1;
+		END_IF
+
+	9:	
+		bTimer1										:= TRUE;
+		IF tgr_PI_1100 > 0.5 THEN
+			bTimer1									:= FALSE;
+			gbVacuumHolding							:= FALSE;
+			b1201DrainOROff							:= FALSE;
+			b1202DrainOROff							:= FALSE;
+			rTime1									:= 30 * MINUTES;
+			rSP1									:= tgr_SP_Steam_Repressurization_Pressure;
+			i4Step									:= i4Step + 1;
+		END_IF
+
+	10:	
+		bTimer1										:= TRUE;	
+		bInRange1									:= tgr_PI_1001 > rSP1;
+		bInRange2									:= tgr_PI_1101 > rSP1;
+		bInRange3									:= tgr_PI_1100 > rSP1;
+		strError									:= SEL(bInRange1, gsPI_1001PressureLow, SEL(bInRange2, gsPI_1101PressureLow, gsPI_1100PressureLow));
+		IF bInRange1 AND bInRange2 AND bInRange3 THEN
+			bTimer1									:= FALSE;
+			tgb_HS_1203								:= TRUE;
+			tgb_HS_1300A							:= TRUE;
+			tgb_HS_1305								:= TRUE;
+			tgb_HS_1301								:= TRUE;
+			rTime2									:= 5 * SECONDS;
+			i4Step									:= i4Step + 1;
+		END_IF
+		
+	11:	
+		bTimer2										:= TRUE;
+		IF tonTimer2.Q THEN
+			bTimer2									:= FALSE;
+			rTime1									:= 20 * SECONDS;
+			rSP1									:= tgr_SP_Min_LRP_Cooling_Loop_Flow;
+			rSP2									:= tgr_SP_Evacuation_Target_Pressure;
+			i4Step									:= i4Step + 1;
+		END_IF
+	
+	12:	
+		bTimer1										:= TRUE;
+		bInRange1									:= tgr_FI_1300 > rSP1;
+		bInRange2									:= tgr_PI_1300 < rSP2;
+		IF bInRange1 AND bInRange2 THEN
+			bTimer1									:= FALSE;
+			tgb_HS_1302A							:= TRUE;
+			rTime2									:= 6 * SECONDS;
+			i4Step									:= i4Step + 1;
+		END_IF
+		
+	13:	
+		bTimer2										:= TRUE;
+		IF tonTimer2.Q THEN
+			bTimer2									:= FALSE;
+			rSP1									:= tgr_SP_Evacuation_Target_Pressure;
+			i4Step									:= i4Step + 1;
+		END_IF
+
+	14:	
+		IF tgr_PI_1300 < rSP1 THEN
+			tgr_IP_1302B							:= tgr_SP_IP_1302B_Valve_Low;
+		END_IF
+		rTime2										:= 3 * SECONDS;
+		i4Step										:= i4Step + 1;
+		
+	15:	
+		bTimer2										:= TRUE;
+		IF tonTimer2.Q THEN
+			bTimer2									:= FALSE;
+			rSP1									:= tgr_SP_Evacuation_Target_Pressure;
+			strError								:= gsTargetPressureHigh;
+			i4Step									:= i4Step + 1;
+		END_IF
+
+	16:	
+		bTimer1										:= TRUE;
+		IF tgr_PI_1300 < rSP1 THEN
+			bTimer1									:= FALSE;
+			tgb_HS_1103A							:= TRUE;
+			tgb_HS_1103B							:= TRUE;
+			bRunValveModulation						:= TRUE;
+			rTime1									:= 5 * MINUTES;
+			rTime2									:= tgr_SP_Steam_Purge_Time * MINUTES;
+			strError								:= gsValveOutOfRange;
+			i4Step									:= i4Step + 1;
+		END_IF
+		
+	17:	
+		bTimer1										:= TRUE;
+		bTimer2										:= TRUE;
+		IF bValveInRange THEN
+			bTimer1									:= FALSE;
+			rTime1									:= SECONDS;
+			strError								:= gsThermocoupleError;
+			i4Step									:= i4Step + 1;
+		END_IF
+		
+	18:	
+		bTimer1										:= TRUE;
+		IF NOT tgb_TI_1100A_Error OR NOT tgb_TI_1100B_Error OR NOT tgb_TI_1100C_Error THEN
+			bTimer1									:= FALSE;
+			rSP1									:= tgr_SP_Max_Allowed_Sorbent_Temp;
+			rSP2									:= tgr_SP_Steam_Purge_Cutoff_Temp;
+			i4Step									:= i4Step + 1;
+		END_IF
+	
+	19:	
+		bInRange1									:= NOT tgb_TI_1100A_Error AND tgr_TI_1100A > rSP1;
+		bInRange2									:= NOT tgb_TI_1100B_Error AND tgr_TI_1100B > rSP1;
+		bInRange3									:= NOT tgb_TI_1100C_Error AND tgr_TI_1100C > rSP1;
+		IF bInRange1 OR bInRange2 OR bInRange3 THEN
+			bOverTemp								:= TRUE;
+			bTimer2									:= FALSE;
+			rTime1									:= SECONDS;
+			i4Step									:= i4Step + 1;
+		ELSE
+			bInRange1								:= (NOT tgb_TI_1100A_Error AND tgr_TI_1100A > rSP2) OR tgb_TI_1100A_Error;
+			bInRange2								:= (NOT tgb_TI_1100B_Error AND tgr_TI_1100B > rSP2) OR tgb_TI_1100B_Error;
+			bInRange3								:= (NOT tgb_TI_1100C_Error AND tgr_TI_1100C > rSP2) OR tgb_TI_1100C_Error;
+			IF tonTimer2.Q THEN
+				bTimer2								:= FALSE;
+				IF bInRange1 AND bInRange2 AND bInRange3 THEN
+					i4Step							:= i4Step + 1;
+				ELSE
+					strProcessError					:= SEL(bOverTemp, gsTempOutOfRange, gsSorbentOverTemp);
+				END_IF
+			END_IF
+		END_IF
+		
+	20:	
+		bRunValveModulation							:= FALSE;
+		tgr_IP_1101									:= 0;
+		tgr_IP_1302B								:= 0;
+		tgb_HS_1101A								:= FALSE;							
+		tgb_HS_1101B								:= FALSE;							
+		rTime1										:= 5 * MINUTES;
+		rSP1										:= 0.5;
+		strError									:= gsPI_1100OutOfRange;
+		i4Step										:= i4Step + 1;	
+
+	21: 
+		bTimer1										:= TRUE;
+		IF tgr_PI_1100 < rSP1 THEN
+			bTimer1									:= FALSE;
+			b1201DrainOROff							:= TRUE;
+			b1202DrainOROff							:= TRUE;
+			rSP1									:= tgr_SP_Evap_Cooling_Cutoff_Temp;
+			rSP2									:= tgr_SP_Evap_Cooling_Target_Pressure;
+			rTime1									:= 20 * MINUTES;
+			i4Step									:= i4Step + 1;
+		END_IF
+		
+	22:	
+		bTimer1										:= TRUE;
+		bInRange1									:= (NOT tgb_TI_1100A_Error AND tgr_TI_1100A < rSP1) OR tgb_TI_1100A_Error;
+		bInRange2									:= (NOT tgb_TI_1100B_Error AND tgr_TI_1100B < rSP1) OR tgb_TI_1100B_Error;
+		bInRange3									:= (NOT tgb_TI_1100C_Error AND tgr_TI_1100C < rSP1) OR tgb_TI_1100C_Error;
+		strError									:= SEL(tgr_PI_1100 >= rSP2, gsTempOutOfRange, gsPI_1100OutOfRange);
+		IF bInRange1 AND bInRange2 AND bInRange3 AND tgr_PI_1100 < rSP2 THEN
+			bTimer1									:= FALSE;
+			i4Step									:= i4Step + 1;
+		END_IF	
+		
+	23:	
+		tgb_HS_1103A								:= FALSE;
+		tgb_HS_1103B								:= FALSE;
+		tgb_HS_1302A								:= FALSE;
+		tgb_HS_1301									:= FALSE;
+		tgb_HS_1305									:= FALSE;
+		tgb_HS_1300A								:= FALSE;
+		tgb_HS_1203									:= FALSE;
+		i4Step										:= i4Step + 1;
+		
+	24:
+		bDesorptionDone								:= TRUE;
+		tgi_Current_Step							:= 0;
+		i4Step										:= 0;		
+	
+END_CASE
+
+strProcessError										:= SEL(bCondenserLow, strProcessError, gsLowCondenserLevel);					// 09/07/23 PS
+
+IF i4Step > 0 THEN
+	IF tonTimer1.Q OR tgb_Stop_Cycle OR strProcessError <> '' THEN
+		giActiveAlarm 								:= SEL(tgb_Stop_Cycle, eDesorption_Alarm, eNo_Alarms);
+		strError									:= SEL(strProcessError <> '', strError, strProcessError);		
+		iStep										:= i4Step;		
+		A_ClearProcess();
+		A0_Reset();
+		i4Step										:= 24;
+	END_IF
+	tgi_Current_Step								:= i4Step;
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A5_Repressurization" Id="{ccc20956-083a-4fba-85b1-ee770184d5f2}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - A5_Repressurization
+// Rev 1.00 - September 22, 2023
+
+CASE i5Step OF
+	
+	0:	;
+		
+	1:	
+		A0_Reset();
+		tgb_AI_1102A_Pump							:= TRUE;
+		tgb_AI_1102B_Pump							:= TRUE;
+		rTime1										:= SECONDS;
+		strError									:= gsThermocoupleError;
+		i5Step										:= 2;
+		
+	2:	
+		bTimer1										:= TRUE;
+		bTempAGood									:= NOT tgb_TI_1100A_Error;
+		bTempBGood									:= NOT tgb_TI_1100B_Error;
+		bTempCGood									:= NOT tgb_TI_1100C_Error;
+		IF bTempAGood OR bTempBGood OR bTempCGood THEN
+			bTimer1									:= FALSE;
+			rTime1									:= DEFAULT_STEP_TIME;
+			rSP1									:= tgr_SP_Adsorption_Temp;
+			strError								:= gsTempOutOfRange;
+			i5Step									:= i5Step + 1;
+		END_IF
+	
+	3:	
+		bTimer1										:= TRUE;
+		bInRange1									:= (bTempAGood AND tgr_TI_1100A < rSP1) OR NOT bTempAGood;
+		bInRange2									:= (bTempBGood AND tgr_TI_1100B < rSP1) OR NOT bTempBGood;
+		bInRange3									:= (bTempCGood AND tgr_TI_1100C < rSP1) OR NOT bTempCGood;
+		IF bInRange1 AND bInRange2 AND bInRange3 THEN
+			bTimer1									:= FALSE;
+			tgb_HS_1104								:= TRUE;
+			rTime1									:= DEFAULT_STEP_TIME;
+			rSP1									:= tgr_SP_Reactor_Repressurization_Pressure;
+			strError								:= gsPI_1100OutOfRange;			
+			i5Step									:= i5Step + 1;
+		END_IF
+		
+	4:	
+		bTimer1										:= TRUE;
+		IF tgr_PI_1100 > rSP1 THEN
+			bTimer1									:= FALSE;
+			rTime2									:= 5 * SECONDS;
+			i5Step									:= i5Step + 1;			
+		END_IF
+		
+	5:	
+		bTimer2										:= TRUE;
+		IF tonTimer2.Q THEN
+			bTimer2									:= FALSE;
+			i5Step									:= i5Step + 1;
+		END_IF
+		
+	6:	
+		tgb_HS_1104									:= FALSE;
+		i5Step										:= i5Step + 1;
+	
+	7:	
+		bRepressurizationDone						:= TRUE;
+		tgi_Current_Step							:= 0;
+		i5Step										:= 0;
+	
+END_CASE
+
+IF i5Step > 0 THEN
+	IF tonTimer1.Q OR tgb_Stop_Cycle OR strProcessError <> '' THEN
+		giActiveAlarm 								:= SEL(tgb_Stop_Cycle, eRepressurization_Alarm, eNo_Alarms);
+		strError									:= SEL(strProcessError <> '', strError, strProcessError);		
+		iStep										:= i5Step;		
+		A_ClearProcess();
+		A0_Reset();
+		i5Step										:= 7;
+	END_IF
+	tgi_Current_Step								:= i5Step;
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A6_Adsorption" Id="{a643833a-43c9-410f-a7a0-350d692a70fe}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - A6_Adsorption
+// Rev 1.00 - September 22, 2023
+
+CASE i6Step OF
+	
+	0:	;
+		
+	1:	
+		A0_Reset();
+		tgb_AI_1102A_Pump							:= TRUE;
+		tgb_AI_1102B_Pump							:= TRUE;
+		bClearDrains								:= FALSE;
+		rSP1										:= tgr_SP_Reactor_Repressurization_Pressure;
+		strError									:= gsReactorPressureLow;
+		rTime1										:= 5 * MINUTES;
+		i6Step										:= i6Step + 1;
+	
+	2:	
+		bTimer1										:= TRUE;
+		IF tgr_PI_1100 > rSP1 THEN
+			tgr_IP_1102A							:= 100;
+			tgr_IP_1102B							:= 100;
+			bTimer1									:= FALSE;
+			rTime1									:= DEFAULT_STEP_TIME;
+			strError								:= gsValvesNotOpen;
+			i6Step									:= i6Step + 1;
+		END_IF
+		
+	3:	
+		bTimer1										:= TRUE;
+		IF gbHS_1102ValvesOpen THEN																		// Valves are fully open
+			bTimer1									:= FALSE;
+			tgr_HS_1102								:= tgr_SP_Adsorption_VFD_Output;
+			bFanError								:= tgb_Auto_Mode;									// Run evacuation if cycling
+			rTime1									:= DEFAULT_STEP_TIME;
+			rSP1									:= 20;
+			strError								:= gsNoAirFlow;
+			i6Step									:= i6Step + 1;
+		END_IF
+	
+	4:	
+		bTimer1										:= TRUE;
+		IF tgr_FIC_1102 > rSP1 THEN																		// Verify fan operation with air flow
+			bTimer1									:= FALSE;
+			bFanError								:= FALSE;
+			rTime2									:= 30 * SECONDS;
+			i6Step									:= i6Step + 1;
+		END_IF
+	
+	5:	
+		bTimer2										:= TRUE;
+		IF tonTimer2.Q THEN
+			bTimer2									:= FALSE;
+			rTime2									:= SEL(tgb_Adsorption_CO2, tgr_SP_Adsorption_Time, tgr_SP_Adsorption_CO2_Time) * MINUTES;
+			rTime1									:= rTime2 + SECONDS;																			// Add extra second to allow Timer2 to time out first
+			rSP1									:= tgr_SP_Adsorption_CO2_Differential;
+			strError								:= gsCO2DifferentialError;
+			i6Step									:= i6Step + 1;
+		END_IF
+		
+	6:	
+		bTimer1										:= TRUE;
+		bTimer2										:= TRUE;
+		bInRange1									:= SEL(tgb_Adsorption_CO2, tonTimer2.Q, ABS(tgr_AI_1102A - tgr_AI_1102B) < rSP1);
+		i6Step										:= SEL(bInRange1, i6Step, i6Step + 1);
+		
+	7:	
+		bTimer1										:= FALSE;
+		bTimer2										:= FALSE; 
+		tgr_HS_1102									:= 0;
+		rTime1										:= DEFAULT_STEP_TIME;
+		strError									:= gsFanStillRunning;
+		i6Step										:= i6Step + 1;
+		
+	8:	
+		bTimer1										:= TRUE;
+		IF tgr_HS_1102_RPM = 0 THEN
+			bTimer1									:= FALSE;
+			tgb_AI_1102A_Pump						:= FALSE;
+			tgb_AI_1102A_Solenoid					:= FALSE;													
+			tgb_AI_1102B_Pump						:= FALSE;
+			tgb_AI_1102B_Solenoid					:= FALSE;													
+			bClearDrains							:= TRUE;
+			rTime2									:= 5 * MINUTES;
+			i6Step									:= i6Step + 1;
+		END_IF
+
+	9:	
+		bTimer2										:= TRUE;
+		IF tonTimer2.Q OR (NOT tgb_HS_1201_LSL AND NOT tgb_HS_1202_LSL) THEN
+			bTimer2									:= FALSE;
+			bClearDrains							:= FALSE;
+			tgr_IP_1102A							:= 0;
+			tgr_IP_1102B							:= 0;
+			rTime1									:= DEFAULT_STEP_TIME;
+			strError								:= gsValvesNotClosed;
+			i6Step									:= i6Step + 1;
+		END_IF
+
+	10:	
+		bTimer1										:= TRUE;
+		IF gbHS_1102ValvesClosed THEN
+			bTimer1									:= FALSE;
+			i6Step									:= i6Step + 1;
+		END_IF
+
+	11:	
+		bAdsorptionDone								:= TRUE;
+		tgi_Current_Step							:= 0;
+		i6Step										:= 0;
+
+END_CASE
+
+IF i6Step > 0 THEN
+	IF tonTimer1.Q OR tgb_Stop_Cycle OR strProcessError <> '' THEN
+		giActiveAlarm 								:= SEL(tgb_Stop_Cycle, eAdsorption_Alarm, eNo_Alarms);
+		strError									:= SEL(strProcessError <> '', strError, strProcessError);		
+		iStep										:= i6Step;		
+		A_ClearProcess();
+		A0_Reset();
+		i6Step										:= 11;
+	END_IF
+	tgi_Current_Step								:= i6Step;
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="P_State_Machine">
+      <LineId Id="10903" Count="250" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+    <LineIds Name="P_State_Machine.A_ClearProcess">
+      <LineId Id="2" Count="2" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="14" Count="1" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="P_State_Machine.A_DPT_Fan_Test">
+      <LineId Id="53" Count="2" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="37" Count="4" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="4" Count="2" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="21" Count="1" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="93" Count="1" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="107" Count="1" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="105" Count="1" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="32" Count="0" />
+    </LineIds>
+    <LineIds Name="P_State_Machine.A_Inputs_Outputs">
+      <LineId Id="2" Count="1" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="190" Count="0" />
+      <LineId Id="321" Count="1" />
+      <LineId Id="193" Count="5" />
+      <LineId Id="200" Count="7" />
+      <LineId Id="209" Count="1" />
+      <LineId Id="213" Count="5" />
+      <LineId Id="372" Count="1" />
+      <LineId Id="481" Count="1" />
+      <LineId Id="219" Count="0" />
+      <LineId Id="4" Count="12" />
+      <LineId Id="432" Count="4" />
+      <LineId Id="17" Count="5" />
+      <LineId Id="24" Count="4" />
+      <LineId Id="285" Count="0" />
+      <LineId Id="263" Count="4" />
+      <LineId Id="293" Count="1" />
+      <LineId Id="454" Count="5" />
+      <LineId Id="295" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="302" Count="0" />
+      <LineId Id="353" Count="0" />
+      <LineId Id="303" Count="0" />
+      <LineId Id="306" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="307" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="308" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="309" Count="0" />
+      <LineId Id="281" Count="0" />
+      <LineId Id="296" Count="0" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="297" Count="0" />
+      <LineId Id="283" Count="0" />
+      <LineId Id="298" Count="0" />
+      <LineId Id="284" Count="0" />
+      <LineId Id="299" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="310" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="311" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="312" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="300" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="301" Count="0" />
+      <LineId Id="480" Count="0" />
+      <LineId Id="483" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="313" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="315" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="316" Count="0" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="317" Count="0" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="318" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="319" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="320" Count="0" />
+      <LineId Id="323" Count="1" />
+      <LineId Id="221" Count="1" />
+      <LineId Id="422" Count="6" />
+      <LineId Id="431" Count="0" />
+      <LineId Id="387" Count="0" />
+      <LineId Id="467" Count="5" />
+      <LineId Id="479" Count="0" />
+      <LineId Id="476" Count="0" />
+      <LineId Id="475" Count="0" />
+      <LineId Id="461" Count="0" />
+      <LineId Id="437" Count="1" />
+      <LineId Id="447" Count="0" />
+      <LineId Id="416" Count="0" />
+      <LineId Id="442" Count="0" />
+      <LineId Id="223" Count="0" />
+      <LineId Id="444" Count="0" />
+      <LineId Id="269" Count="0" />
+      <LineId Id="445" Count="0" />
+      <LineId Id="270" Count="0" />
+      <LineId Id="478" Count="0" />
+      <LineId Id="278" Count="0" />
+      <LineId Id="347" Count="1" />
+      <LineId Id="370" Count="0" />
+      <LineId Id="349" Count="1" />
+      <LineId Id="371" Count="0" />
+      <LineId Id="375" Count="0" />
+      <LineId Id="369" Count="0" />
+      <LineId Id="355" Count="13" />
+      <LineId Id="351" Count="0" />
+      <LineId Id="325" Count="0" />
+      <LineId Id="352" Count="0" />
+      <LineId Id="383" Count="0" />
+    </LineIds>
+    <LineIds Name="P_State_Machine.A_Interlocks">
+      <LineId Id="2" Count="1" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="208" Count="0" />
+    </LineIds>
+    <LineIds Name="P_State_Machine.A_Modbus_Points">
+      <LineId Id="2" Count="2" />
+      <LineId Id="692" Count="0" />
+      <LineId Id="872" Count="0" />
+      <LineId Id="883" Count="0" />
+      <LineId Id="886" Count="1" />
+      <LineId Id="902" Count="0" />
+      <LineId Id="901" Count="0" />
+      <LineId Id="878" Count="0" />
+      <LineId Id="897" Count="2" />
+      <LineId Id="904" Count="0" />
+      <LineId Id="906" Count="0" />
+      <LineId Id="900" Count="0" />
+      <LineId Id="911" Count="1" />
+      <LineId Id="914" Count="2" />
+      <LineId Id="913" Count="0" />
+      <LineId Id="893" Count="0" />
+      <LineId Id="758" Count="0" />
+      <LineId Id="654" Count="0" />
+      <LineId Id="756" Count="0" />
+      <LineId Id="695" Count="0" />
+      <LineId Id="245" Count="0" />
+      <LineId Id="648" Count="0" />
+      <LineId Id="246" Count="0" />
+      <LineId Id="861" Count="0" />
+      <LineId Id="572" Count="0" />
+      <LineId Id="759" Count="0" />
+      <LineId Id="862" Count="0" />
+      <LineId Id="760" Count="19" />
+      <LineId Id="445" Count="3" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="P_State_Machine.A_Modbus_VFD">
+      <LineId Id="2" Count="2" />
+      <LineId Id="576" Count="0" />
+      <LineId Id="691" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="747" Count="0" />
+      <LineId Id="17" Count="2" />
+      <LineId Id="748" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="890" Count="0" />
+      <LineId Id="651" Count="1" />
+      <LineId Id="689" Count="1" />
+      <LineId Id="757" Count="1" />
+      <LineId Id="654" Count="0" />
+      <LineId Id="756" Count="0" />
+      <LineId Id="695" Count="0" />
+      <LineId Id="245" Count="0" />
+      <LineId Id="648" Count="0" />
+      <LineId Id="246" Count="0" />
+      <LineId Id="861" Count="0" />
+      <LineId Id="572" Count="0" />
+      <LineId Id="759" Count="0" />
+      <LineId Id="862" Count="0" />
+      <LineId Id="760" Count="21" />
+      <LineId Id="863" Count="0" />
+      <LineId Id="782" Count="19" />
+      <LineId Id="803" Count="1" />
+      <LineId Id="802" Count="0" />
+      <LineId Id="805" Count="0" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="865" Count="0" />
+      <LineId Id="254" Count="21" />
+      <LineId Id="866" Count="0" />
+      <LineId Id="578" Count="9" />
+      <LineId Id="289" Count="10" />
+      <LineId Id="325" Count="0" />
+      <LineId Id="867" Count="0" />
+      <LineId Id="598" Count="9" />
+      <LineId Id="521" Count="0" />
+      <LineId Id="340" Count="10" />
+      <LineId Id="868" Count="0" />
+      <LineId Id="608" Count="9" />
+      <LineId Id="363" Count="10" />
+      <LineId Id="398" Count="0" />
+      <LineId Id="869" Count="0" />
+      <LineId Id="628" Count="9" />
+      <LineId Id="411" Count="11" />
+      <LineId Id="870" Count="0" />
+      <LineId Id="638" Count="9" />
+      <LineId Id="435" Count="13" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="P_State_Machine.A_Status_List">
+      <LineId Id="2" Count="1" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="5" Count="34" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="43" Count="0" />
+    </LineIds>
+    <LineIds Name="P_State_Machine.A_Temperatures">
+      <LineId Id="2" Count="1" />
+      <LineId Id="504" Count="0" />
+      <LineId Id="633" Count="1" />
+      <LineId Id="683" Count="0" />
+      <LineId Id="635" Count="1" />
+      <LineId Id="625" Count="1" />
+      <LineId Id="684" Count="0" />
+      <LineId Id="627" Count="1" />
+      <LineId Id="505" Count="0" />
+      <LineId Id="507" Count="0" />
+      <LineId Id="710" Count="0" />
+      <LineId Id="579" Count="0" />
+      <LineId Id="554" Count="1" />
+      <LineId Id="557" Count="0" />
+      <LineId Id="711" Count="0" />
+      <LineId Id="580" Count="0" />
+      <LineId Id="536" Count="0" />
+      <LineId Id="637" Count="1" />
+      <LineId Id="712" Count="0" />
+      <LineId Id="639" Count="1" />
+      <LineId Id="629" Count="1" />
+      <LineId Id="713" Count="0" />
+      <LineId Id="631" Count="1" />
+      <LineId Id="513" Count="0" />
+      <LineId Id="515" Count="0" />
+      <LineId Id="714" Count="0" />
+      <LineId Id="581" Count="0" />
+      <LineId Id="538" Count="0" />
+      <LineId Id="521" Count="0" />
+      <LineId Id="523" Count="0" />
+      <LineId Id="715" Count="0" />
+      <LineId Id="617" Count="0" />
+      <LineId Id="540" Count="0" />
+      <LineId Id="582" Count="1" />
+      <LineId Id="716" Count="0" />
+      <LineId Id="618" Count="0" />
+      <LineId Id="584" Count="2" />
+      <LineId Id="717" Count="0" />
+      <LineId Id="619" Count="0" />
+      <LineId Id="587" Count="2" />
+      <LineId Id="718" Count="0" />
+      <LineId Id="620" Count="0" />
+      <LineId Id="590" Count="0" />
+      <LineId Id="645" Count="1" />
+      <LineId Id="719" Count="0" />
+      <LineId Id="647" Count="1" />
+      <LineId Id="641" Count="1" />
+      <LineId Id="720" Count="0" />
+      <LineId Id="643" Count="1" />
+      <LineId Id="525" Count="0" />
+      <LineId Id="527" Count="0" />
+      <LineId Id="721" Count="0" />
+      <LineId Id="621" Count="0" />
+      <LineId Id="533" Count="0" />
+      <LineId Id="529" Count="0" />
+      <LineId Id="531" Count="0" />
+      <LineId Id="722" Count="0" />
+      <LineId Id="622" Count="0" />
+      <LineId Id="463" Count="0" />
+      <LineId Id="558" Count="17" />
+      <LineId Id="597" Count="16" />
+      <LineId Id="694" Count="0" />
+      <LineId Id="650" Count="0" />
+      <LineId Id="776" Count="0" />
+      <LineId Id="670" Count="0" />
+      <LineId Id="657" Count="0" />
+      <LineId Id="686" Count="0" />
+      <LineId Id="708" Count="0" />
+      <LineId Id="675" Count="0" />
+      <LineId Id="678" Count="0" />
+      <LineId Id="690" Count="0" />
+      <LineId Id="709" Count="0" />
+      <LineId Id="723" Count="0" />
+      <LineId Id="725" Count="50" />
+      <LineId Id="676" Count="0" />
+      <LineId Id="702" Count="0" />
+      <LineId Id="777" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="P_State_Machine.A_WaterHandling">
+      <LineId Id="2" Count="1" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="14" Count="6" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="127" Count="7" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="101" Count="1" />
+      <LineId Id="140" Count="3" />
+      <LineId Id="48" Count="0" />
+    </LineIds>
+    <LineIds Name="P_State_Machine.A0_Reset">
+      <LineId Id="2" Count="1" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="95" Count="2" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="30" Count="8" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="42" Count="5" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="60" Count="4" />
+      <LineId Id="93" Count="1" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="P_State_Machine.A1_WarmUp">
+      <LineId Id="2" Count="2" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="97" Count="2" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="346" Count="0" />
+      <LineId Id="414" Count="0" />
+      <LineId Id="416" Count="0" />
+      <LineId Id="351" Count="0" />
+      <LineId Id="355" Count="0" />
+      <LineId Id="352" Count="0" />
+      <LineId Id="356" Count="0" />
+      <LineId Id="358" Count="1" />
+      <LineId Id="357" Count="0" />
+      <LineId Id="409" Count="1" />
+      <LineId Id="365" Count="0" />
+      <LineId Id="361" Count="0" />
+      <LineId Id="391" Count="0" />
+      <LineId Id="397" Count="0" />
+      <LineId Id="412" Count="0" />
+      <LineId Id="394" Count="0" />
+      <LineId Id="392" Count="0" />
+      <LineId Id="402" Count="2" />
+      <LineId Id="393" Count="0" />
+      <LineId Id="362" Count="0" />
+      <LineId Id="353" Count="1" />
+      <LineId Id="372" Count="0" />
+      <LineId Id="374" Count="1" />
+      <LineId Id="383" Count="0" />
+      <LineId Id="407" Count="1" />
+      <LineId Id="377" Count="0" />
+      <LineId Id="376" Count="0" />
+      <LineId Id="373" Count="0" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="312" Count="0" />
+      <LineId Id="405" Count="0" />
+      <LineId Id="319" Count="0" />
+      <LineId Id="335" Count="0" />
+      <LineId Id="411" Count="0" />
+      <LineId Id="336" Count="0" />
+      <LineId Id="386" Count="0" />
+      <LineId Id="315" Count="0" />
+      <LineId Id="237" Count="0" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="298" Count="0" />
+      <LineId Id="241" Count="1" />
+      <LineId Id="238" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="368" Count="0" />
+      <LineId Id="367" Count="0" />
+      <LineId Id="248" Count="0" />
+      <LineId Id="258" Count="0" />
+      <LineId Id="341" Count="0" />
+      <LineId Id="344" Count="0" />
+      <LineId Id="413" Count="0" />
+      <LineId Id="338" Count="0" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="264" Count="0" />
+      <LineId Id="268" Count="0" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="117" Count="0" />
+    </LineIds>
+    <LineIds Name="P_State_Machine.A2_Evacuation">
+      <LineId Id="2" Count="1" />
+      <LineId Id="267" Count="0" />
+      <LineId Id="5" Count="1" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="276" Count="0" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="635" Count="0" />
+      <LineId Id="665" Count="0" />
+      <LineId Id="667" Count="0" />
+      <LineId Id="440" Count="0" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="35" Count="2" />
+      <LineId Id="636" Count="0" />
+      <LineId Id="603" Count="0" />
+      <LineId Id="183" Count="1" />
+      <LineId Id="601" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="44" Count="1" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="637" Count="0" />
+      <LineId Id="266" Count="0" />
+      <LineId Id="191" Count="0" />
+      <LineId Id="604" Count="0" />
+      <LineId Id="192" Count="0" />
+      <LineId Id="190" Count="0" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="638" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="198" Count="0" />
+      <LineId Id="227" Count="0" />
+      <LineId Id="605" Count="0" />
+      <LineId Id="199" Count="0" />
+      <LineId Id="196" Count="0" />
+      <LineId Id="55" Count="1" />
+      <LineId Id="639" Count="0" />
+      <LineId Id="201" Count="1" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="562" Count="0" />
+      <LineId Id="206" Count="0" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="281" Count="0" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="208" Count="0" />
+      <LineId Id="640" Count="0" />
+      <LineId Id="284" Count="0" />
+      <LineId Id="278" Count="0" />
+      <LineId Id="283" Count="0" />
+      <LineId Id="424" Count="0" />
+      <LineId Id="600" Count="0" />
+      <LineId Id="280" Count="0" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="274" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="641" Count="0" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="288" Count="1" />
+      <LineId Id="599" Count="0" />
+      <LineId Id="290" Count="1" />
+      <LineId Id="287" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="642" Count="0" />
+      <LineId Id="292" Count="2" />
+      <LineId Id="298" Count="1" />
+      <LineId Id="427" Count="0" />
+      <LineId Id="598" Count="0" />
+      <LineId Id="300" Count="0" />
+      <LineId Id="295" Count="0" />
+      <LineId Id="301" Count="0" />
+      <LineId Id="306" Count="0" />
+      <LineId Id="643" Count="0" />
+      <LineId Id="230" Count="1" />
+      <LineId Id="488" Count="0" />
+      <LineId Id="303" Count="1" />
+      <LineId Id="307" Count="0" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="236" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="644" Count="0" />
+      <LineId Id="308" Count="1" />
+      <LineId Id="320" Count="0" />
+      <LineId Id="428" Count="0" />
+      <LineId Id="606" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="311" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="312" Count="0" />
+      <LineId Id="645" Count="0" />
+      <LineId Id="313" Count="0" />
+      <LineId Id="502" Count="0" />
+      <LineId Id="314" Count="0" />
+      <LineId Id="319" Count="0" />
+      <LineId Id="321" Count="0" />
+      <LineId Id="317" Count="1" />
+      <LineId Id="241" Count="0" />
+      <LineId Id="323" Count="0" />
+      <LineId Id="646" Count="0" />
+      <LineId Id="324" Count="2" />
+      <LineId Id="429" Count="0" />
+      <LineId Id="327" Count="2" />
+      <LineId Id="246" Count="0" />
+      <LineId Id="647" Count="0" />
+      <LineId Id="576" Count="1" />
+      <LineId Id="614" Count="0" />
+      <LineId Id="578" Count="0" />
+      <LineId Id="501" Count="0" />
+      <LineId Id="264" Count="0" />
+      <LineId Id="247" Count="1" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="489" Count="0" />
+      <LineId Id="333" Count="0" />
+      <LineId Id="332" Count="0" />
+      <LineId Id="254" Count="0" />
+      <LineId Id="330" Count="0" />
+      <LineId Id="255" Count="0" />
+      <LineId Id="334" Count="0" />
+      <LineId Id="648" Count="0" />
+      <LineId Id="335" Count="1" />
+      <LineId Id="631" Count="0" />
+      <LineId Id="441" Count="0" />
+      <LineId Id="619" Count="0" />
+      <LineId Id="338" Count="2" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="649" Count="0" />
+      <LineId Id="632" Count="1" />
+      <LineId Id="522" Count="0" />
+      <LineId Id="546" Count="0" />
+      <LineId Id="500" Count="0" />
+      <LineId Id="412" Count="0" />
+      <LineId Id="496" Count="0" />
+      <LineId Id="650" Count="0" />
+      <LineId Id="497" Count="0" />
+      <LineId Id="447" Count="0" />
+      <LineId Id="475" Count="0" />
+      <LineId Id="262" Count="1" />
+      <LineId Id="81" Count="1" />
+      <LineId Id="653" Count="3" />
+      <LineId Id="664" Count="0" />
+      <LineId Id="657" Count="5" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="P_State_Machine.A3_SteamBypass">
+      <LineId Id="56" Count="0" />
+      <LineId Id="2" Count="5" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="352" Count="0" />
+      <LineId Id="512" Count="0" />
+      <LineId Id="514" Count="0" />
+      <LineId Id="511" Count="0" />
+      <LineId Id="385" Count="4" />
+      <LineId Id="494" Count="15" />
+      <LineId Id="401" Count="0" />
+      <LineId Id="482" Count="11" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="350" Count="0" />
+      <LineId Id="274" Count="0" />
+      <LineId Id="143" Count="0" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="475" Count="3" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="36" Count="2" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="349" Count="0" />
+      <LineId Id="154" Count="1" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="267" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="348" Count="0" />
+      <LineId Id="161" Count="1" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="165" Count="0" />
+      <LineId Id="347" Count="0" />
+      <LineId Id="188" Count="1" />
+      <LineId Id="283" Count="1" />
+      <LineId Id="192" Count="1" />
+      <LineId Id="185" Count="0" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="346" Count="0" />
+      <LineId Id="337" Count="0" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="194" Count="2" />
+      <LineId Id="269" Count="0" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="345" Count="0" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="415" Count="0" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="416" Count="0" />
+      <LineId Id="184" Count="0" />
+      <LineId Id="197" Count="0" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="344" Count="0" />
+      <LineId Id="308" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="44" Count="1" />
+      <LineId Id="412" Count="0" />
+      <LineId Id="411" Count="0" />
+      <LineId Id="327" Count="3" />
+      <LineId Id="510" Count="0" />
+      <LineId Id="331" Count="0" />
+      <LineId Id="354" Count="0" />
+      <LineId Id="333" Count="3" />
+      <LineId Id="123" Count="0" />
+    </LineIds>
+    <LineIds Name="P_State_Machine.A4_Desorption">
+      <LineId Id="322" Count="1" />
+      <LineId Id="896" Count="0" />
+      <LineId Id="325" Count="4" />
+      <LineId Id="891" Count="0" />
+      <LineId Id="953" Count="0" />
+      <LineId Id="358" Count="1" />
+      <LineId Id="494" Count="1" />
+      <LineId Id="797" Count="0" />
+      <LineId Id="362" Count="1" />
+      <LineId Id="491" Count="0" />
+      <LineId Id="901" Count="0" />
+      <LineId Id="497" Count="0" />
+      <LineId Id="492" Count="0" />
+      <LineId Id="498" Count="0" />
+      <LineId Id="493" Count="0" />
+      <LineId Id="496" Count="0" />
+      <LineId Id="364" Count="0" />
+      <LineId Id="902" Count="0" />
+      <LineId Id="696" Count="2" />
+      <LineId Id="451" Count="1" />
+      <LineId Id="454" Count="0" />
+      <LineId Id="370" Count="3" />
+      <LineId Id="903" Count="0" />
+      <LineId Id="374" Count="0" />
+      <LineId Id="455" Count="0" />
+      <LineId Id="467" Count="0" />
+      <LineId Id="458" Count="0" />
+      <LineId Id="801" Count="0" />
+      <LineId Id="378" Count="1" />
+      <LineId Id="459" Count="1" />
+      <LineId Id="904" Count="0" />
+      <LineId Id="468" Count="1" />
+      <LineId Id="461" Count="0" />
+      <LineId Id="470" Count="1" />
+      <LineId Id="475" Count="0" />
+      <LineId Id="462" Count="2" />
+      <LineId Id="394" Count="0" />
+      <LineId Id="905" Count="0" />
+      <LineId Id="396" Count="0" />
+      <LineId Id="799" Count="1" />
+      <LineId Id="397" Count="0" />
+      <LineId Id="472" Count="0" />
+      <LineId Id="476" Count="0" />
+      <LineId Id="398" Count="0" />
+      <LineId Id="699" Count="0" />
+      <LineId Id="400" Count="1" />
+      <LineId Id="906" Count="0" />
+      <LineId Id="954" Count="0" />
+      <LineId Id="477" Count="1" />
+      <LineId Id="481" Count="0" />
+      <LineId Id="809" Count="0" />
+      <LineId Id="480" Count="0" />
+      <LineId Id="479" Count="0" />
+      <LineId Id="406" Count="1" />
+      <LineId Id="907" Count="0" />
+      <LineId Id="501" Count="0" />
+      <LineId Id="482" Count="0" />
+      <LineId Id="502" Count="0" />
+      <LineId Id="409" Count="0" />
+      <LineId Id="483" Count="0" />
+      <LineId Id="416" Count="0" />
+      <LineId Id="810" Count="0" />
+      <LineId Id="417" Count="3" />
+      <LineId Id="908" Count="0" />
+      <LineId Id="421" Count="1" />
+      <LineId Id="503" Count="0" />
+      <LineId Id="505" Count="1" />
+      <LineId Id="504" Count="0" />
+      <LineId Id="510" Count="0" />
+      <LineId Id="427" Count="1" />
+      <LineId Id="485" Count="0" />
+      <LineId Id="429" Count="0" />
+      <LineId Id="909" Count="0" />
+      <LineId Id="509" Count="0" />
+      <LineId Id="723" Count="1" />
+      <LineId Id="812" Count="0" />
+      <LineId Id="508" Count="0" />
+      <LineId Id="511" Count="0" />
+      <LineId Id="513" Count="5" />
+      <LineId Id="512" Count="0" />
+      <LineId Id="519" Count="1" />
+      <LineId Id="910" Count="0" />
+      <LineId Id="521" Count="1" />
+      <LineId Id="526" Count="0" />
+      <LineId Id="524" Count="0" />
+      <LineId Id="532" Count="0" />
+      <LineId Id="527" Count="0" />
+      <LineId Id="523" Count="0" />
+      <LineId Id="487" Count="0" />
+      <LineId Id="528" Count="0" />
+      <LineId Id="911" Count="0" />
+      <LineId Id="533" Count="0" />
+      <LineId Id="729" Count="0" />
+      <LineId Id="534" Count="0" />
+      <LineId Id="537" Count="0" />
+      <LineId Id="695" Count="0" />
+      <LineId Id="539" Count="0" />
+      <LineId Id="535" Count="1" />
+      <LineId Id="540" Count="0" />
+      <LineId Id="542" Count="0" />
+      <LineId Id="912" Count="0" />
+      <LineId Id="543" Count="1" />
+      <LineId Id="551" Count="0" />
+      <LineId Id="548" Count="1" />
+      <LineId Id="780" Count="0" />
+      <LineId Id="550" Count="0" />
+      <LineId Id="913" Count="0" />
+      <LineId Id="790" Count="2" />
+      <LineId Id="776" Count="1" />
+      <LineId Id="782" Count="0" />
+      <LineId Id="914" Count="0" />
+      <LineId Id="783" Count="1" />
+      <LineId Id="793" Count="0" />
+      <LineId Id="826" Count="0" />
+      <LineId Id="787" Count="2" />
+      <LineId Id="552" Count="0" />
+      <LineId Id="915" Count="0" />
+      <LineId Id="554" Count="1" />
+      <LineId Id="560" Count="0" />
+      <LineId Id="562" Count="0" />
+      <LineId Id="561" Count="0" />
+      <LineId Id="565" Count="0" />
+      <LineId Id="700" Count="0" />
+      <LineId Id="827" Count="0" />
+      <LineId Id="557" Count="2" />
+      <LineId Id="566" Count="0" />
+      <LineId Id="916" Count="0" />
+      <LineId Id="701" Count="0" />
+      <LineId Id="567" Count="1" />
+      <LineId Id="773" Count="0" />
+      <LineId Id="828" Count="0" />
+      <LineId Id="573" Count="2" />
+      <LineId Id="594" Count="0" />
+      <LineId Id="917" Count="0" />
+      <LineId Id="598" Count="2" />
+      <LineId Id="605" Count="0" />
+      <LineId Id="602" Count="2" />
+      <LineId Id="576" Count="0" />
+      <LineId Id="918" Count="0" />
+      <LineId Id="578" Count="2" />
+      <LineId Id="753" Count="0" />
+      <LineId Id="750" Count="0" />
+      <LineId Id="748" Count="0" />
+      <LineId Id="585" Count="0" />
+      <LineId Id="608" Count="1" />
+      <LineId Id="613" Count="1" />
+      <LineId Id="616" Count="0" />
+      <LineId Id="744" Count="0" />
+      <LineId Id="743" Count="0" />
+      <LineId Id="618" Count="0" />
+      <LineId Id="745" Count="0" />
+      <LineId Id="920" Count="0" />
+      <LineId Id="747" Count="0" />
+      <LineId Id="617" Count="0" />
+      <LineId Id="586" Count="1" />
+      <LineId Id="620" Count="0" />
+      <LineId Id="922" Count="0" />
+      <LineId Id="621" Count="0" />
+      <LineId Id="772" Count="0" />
+      <LineId Id="624" Count="1" />
+      <LineId Id="622" Count="0" />
+      <LineId Id="630" Count="0" />
+      <LineId Id="835" Count="0" />
+      <LineId Id="626" Count="2" />
+      <LineId Id="923" Count="0" />
+      <LineId Id="629" Count="0" />
+      <LineId Id="639" Count="0" />
+      <LineId Id="633" Count="1" />
+      <LineId Id="619" Count="0" />
+      <LineId Id="641" Count="2" />
+      <LineId Id="638" Count="0" />
+      <LineId Id="541" Count="0" />
+      <LineId Id="531" Count="0" />
+      <LineId Id="924" Count="0" />
+      <LineId Id="646" Count="2" />
+      <LineId Id="842" Count="0" />
+      <LineId Id="645" Count="0" />
+      <LineId Id="650" Count="1" />
+      <LineId Id="649" Count="0" />
+      <LineId Id="644" Count="0" />
+      <LineId Id="652" Count="0" />
+      <LineId Id="925" Count="0" />
+      <LineId Id="656" Count="0" />
+      <LineId Id="658" Count="3" />
+      <LineId Id="950" Count="1" />
+      <LineId Id="937" Count="1" />
+      <LineId Id="657" Count="0" />
+      <LineId Id="664" Count="1" />
+      <LineId Id="653" Count="0" />
+      <LineId Id="430" Count="1" />
+      <LineId Id="899" Count="1" />
+      <LineId Id="927" Count="3" />
+      <LineId Id="952" Count="0" />
+      <LineId Id="931" Count="5" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="P_State_Machine.A5_Repressurization">
+      <LineId Id="2" Count="5" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="273" Count="0" />
+      <LineId Id="275" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="240" Count="0" />
+      <LineId Id="41" Count="1" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="237" Count="2" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="241" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="148" Count="1" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="245" Count="0" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="243" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="156" Count="1" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="162" Count="0" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="160" Count="1" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="188" Count="2" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="254" Count="0" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="255" Count="0" />
+      <LineId Id="257" Count="3" />
+      <LineId Id="85" Count="1" />
+      <LineId Id="262" Count="3" />
+      <LineId Id="272" Count="0" />
+      <LineId Id="266" Count="5" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="P_State_Machine.A6_Adsorption">
+      <LineId Id="2" Count="5" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="468" Count="0" />
+      <LineId Id="491" Count="0" />
+      <LineId Id="493" Count="0" />
+      <LineId Id="456" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="419" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="34" Count="1" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="479" Count="0" />
+      <LineId Id="212" Count="0" />
+      <LineId Id="208" Count="0" />
+      <LineId Id="214" Count="0" />
+      <LineId Id="231" Count="1" />
+      <LineId Id="420" Count="0" />
+      <LineId Id="215" Count="0" />
+      <LineId Id="209" Count="0" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="480" Count="0" />
+      <LineId Id="222" Count="0" />
+      <LineId Id="434" Count="0" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="430" Count="0" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="415" Count="0" />
+      <LineId Id="421" Count="0" />
+      <LineId Id="236" Count="0" />
+      <LineId Id="227" Count="0" />
+      <LineId Id="223" Count="0" />
+      <LineId Id="407" Count="0" />
+      <LineId Id="481" Count="0" />
+      <LineId Id="408" Count="0" />
+      <LineId Id="410" Count="0" />
+      <LineId Id="431" Count="0" />
+      <LineId Id="411" Count="3" />
+      <LineId Id="224" Count="0" />
+      <LineId Id="482" Count="0" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="436" Count="0" />
+      <LineId Id="341" Count="0" />
+      <LineId Id="246" Count="0" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="422" Count="0" />
+      <LineId Id="243" Count="0" />
+      <LineId Id="238" Count="0" />
+      <LineId Id="244" Count="1" />
+      <LineId Id="483" Count="0" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="342" Count="0" />
+      <LineId Id="258" Count="0" />
+      <LineId Id="261" Count="0" />
+      <LineId Id="346" Count="0" />
+      <LineId Id="484" Count="0" />
+      <LineId Id="347" Count="0" />
+      <LineId Id="333" Count="1" />
+      <LineId Id="423" Count="0" />
+      <LineId Id="335" Count="1" />
+      <LineId Id="262" Count="0" />
+      <LineId Id="485" Count="0" />
+      <LineId Id="265" Count="0" />
+      <LineId Id="389" Count="0" />
+      <LineId Id="495" Count="3" />
+      <LineId Id="454" Count="0" />
+      <LineId Id="320" Count="0" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="267" Count="0" />
+      <LineId Id="317" Count="0" />
+      <LineId Id="440" Count="0" />
+      <LineId Id="486" Count="0" />
+      <LineId Id="441" Count="1" />
+      <LineId Id="455" Count="0" />
+      <LineId Id="443" Count="1" />
+      <LineId Id="449" Count="4" />
+      <LineId Id="316" Count="0" />
+      <LineId Id="487" Count="0" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="280" Count="0" />
+      <LineId Id="388" Count="0" />
+      <LineId Id="281" Count="0" />
+      <LineId Id="376" Count="0" />
+      <LineId Id="374" Count="0" />
+      <LineId Id="392" Count="0" />
+      <LineId Id="489" Count="0" />
+      <LineId Id="321" Count="0" />
+      <LineId Id="457" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="469" Count="3" />
+      <LineId Id="490" Count="0" />
+      <LineId Id="473" Count="5" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

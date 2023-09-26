@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="MAIN" Id="{7b5c6900-f69e-43ee-9643-c9f20204e07b}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+
+VAR
+	rtrigHmiStartup									: R_TRIG;
+	ftrigHmiShutdown								: F_TRIG;
+	tonHalfSecPulse									: TON;
+	tonWatchdog										: TON;
+	bMBWeather										: BOOL;
+	iVFDCount										: INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Calvin - MAIN
+// Rev 1.00 - August 5, 2023
+
+P_State_Machine();
+P_AlarmCheck();
+P_HeaterControl();
+P_VFD_Test();
+
+rtrigHmiStartup(CLK:= tgb_ADS_Active);
+IF rtrigHmiStartup.Q THEN
+//	gbRunVFD										:= TRUE;
+	tgr_HS_1102										:= 0;
+END_IF
+ftrigHmiShutdown(CLK:= tgb_ADS_Active);
+IF ftrigHmiShutdown.Q THEN
+//	gbRunVFD										:= FALSE;
+	eState											:= eReset;
+	P_State_Machine.A0_Reset();
+END_IF
+
+/// TIMER PULSE
+IF tonHalfSecPulse.Q THEN
+	tgb_Half_Sec_Pulse								:= NOT tgb_Half_Sec_Pulse;
+	tgb_Watchdog									:= TRUE;
+	tonHalfSecPulse(IN:= FALSE);
+	iVFDCount										:= iVFDCount + 1;
+	IF iVFDCount >= 4 THEN
+		iVFDCount									:= 0;
+		gbReadMBVFD									:= TRUE;
+		IF bMBWeather THEN
+			gbReadMBWeather							:= TRUE;
+		ELSE
+			gbReadMBInclinometer					:= TRUE;
+		END_IF
+		bMBWeather									:= NOT bMBWeather;
+	END_IF
+END_IF
+tonHalfSecPulse(IN:= TRUE, PT:= T#500MS);
+
+(*IF tonWatchdog.Q THEN
+	tgb_ADS_Active									:= FALSE;
+END_IF
+tonWatchdog(IN:= tgb_Watchdog AND tgb_ADS_Active, PT:= T#4S);	*)
+]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="868" Count="5" />
+      <LineId Id="1050" Count="0" />
+      <LineId Id="1073" Count="0" />
+      <LineId Id="876" Count="6" />
+      <LineId Id="1109" Count="0" />
+      <LineId Id="885" Count="3" />
+      <LineId Id="902" Count="2" />
+      <LineId Id="1138" Count="0" />
+      <LineId Id="905" Count="5" />
+      <LineId Id="1126" Count="0" />
+      <LineId Id="912" Count="4" />
+      <LineId Id="951" Count="1" />
+      <LineId Id="1133" Count="4" />
+      <LineId Id="991" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

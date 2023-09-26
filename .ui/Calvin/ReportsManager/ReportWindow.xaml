@@ -1,0 +1,86 @@
+﻿<!-- Rev 1.00 - May 7, 2023 -->
+<Window x:Class="Calvin.ReportsManager.ReportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+    Height="768" Width="1366" FontSize="18" WindowStyle="None" ResizeMode="NoResize" WindowState="Maximized">
+    <Border Style="{StaticResource styleBorder}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="75"/>
+                <RowDefinition Height="630"/>
+                <RowDefinition Height="45"/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Top">
+                <Label Width="1060" Style="{StaticResource styleLblBold}" x:Name="labTitle" Content="Report Title"/>
+            </StackPanel>
+            <DataGrid Grid.Row="1" HorizontalAlignment="Left" Margin="10,0,10,0" Width="1328" Height="630" VerticalAlignment="Top" ItemsSource="{Binding LogCollection}" AutoGenerateColumns="False">
+                <DataGrid.Resources>
+                    <Style TargetType="ScrollBar">
+                        <Style.Triggers>
+                            <Trigger Property="Orientation" Value="Horizontal">
+                                <Setter Property="Height" Value="30"/>
+                            </Trigger>
+                            <Trigger Property="Orientation" Value="Vertical">
+                                <Setter Property="Width" Value="30"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Column00" x:Name="dgtColumn00" Binding="{Binding Column00}"/>
+                    <DataGridTextColumn Header="Column01" x:Name="dgtColumn01" Binding="{Binding Column01}"/>
+                    <DataGridTextColumn Header="Column02" x:Name="dgtColumn02" Binding="{Binding Column02}"/>
+                    <DataGridTextColumn Header="Column03" x:Name="dgtColumn03" Binding="{Binding Column03}"/>
+                    <DataGridTextColumn Header="Column04" x:Name="dgtColumn04" Binding="{Binding Column04}"/>
+                    <DataGridTextColumn Header="Column05" x:Name="dgtColumn05" Binding="{Binding Column05}"/>
+                    <DataGridTextColumn Header="Column06" x:Name="dgtColumn06" Binding="{Binding Column06}"/>
+                    <DataGridTextColumn Header="Column07" x:Name="dgtColumn07" Binding="{Binding Column07}"/>
+                    <DataGridTextColumn Header="Column08" x:Name="dgtColumn08" Binding="{Binding Column08}"/>
+                    <DataGridTextColumn Header="Column09" x:Name="dgtColumn09" Binding="{Binding Column09}"/>
+                    <DataGridTextColumn Header="Column10" x:Name="dgtColumn10" Binding="{Binding Column10}"/>
+                    <DataGridTextColumn Header="Column11" x:Name="dgtColumn11" Binding="{Binding Column11}"/>
+                    <DataGridTextColumn Header="Column12" x:Name="dgtColumn12" Binding="{Binding Column12}"/>
+                    <DataGridTextColumn Header="Column13" x:Name="dgtColumn13" Binding="{Binding Column13}"/>
+                    <DataGridTextColumn Header="Column14" x:Name="dgtColumn14" Binding="{Binding Column14}"/>
+                    <DataGridTextColumn Header="Column15" x:Name="dgtColumn15" Binding="{Binding Column15}"/>
+                    <DataGridTextColumn Header="Column16" x:Name="dgtColumn16" Binding="{Binding Column16}"/>
+                    <DataGridTextColumn Header="Column17" x:Name="dgtColumn17" Binding="{Binding Column17}"/>
+                    <DataGridTextColumn Header="Column18" x:Name="dgtColumn18" Binding="{Binding Column18}"/>
+                    <DataGridTextColumn Header="Column19" x:Name="dgtColumn19" Binding="{Binding Column19}"/>
+                    <DataGridTextColumn Header="Column20" x:Name="dgtColumn20" Binding="{Binding Column20}"/>
+                    <DataGridTextColumn Header="Column21" x:Name="dgtColumn21" Binding="{Binding Column21}"/>
+                    <DataGridTextColumn Header="Column22" x:Name="dgtColumn22" Binding="{Binding Column22}"/>
+                    <DataGridTextColumn Header="Column23" x:Name="dgtColumn23" Binding="{Binding Column23}"/>
+                    <DataGridTextColumn Header="Column24" x:Name="dgtColumn24" Binding="{Binding Column24}"/>
+                    <DataGridTextColumn Header="Column25" x:Name="dgtColumn25" Binding="{Binding Column25}"/>
+                    <DataGridTextColumn Header="Column26" x:Name="dgtColumn26" Binding="{Binding Column26}"/>
+                    <DataGridTextColumn Header="Column27" x:Name="dgtColumn27" Binding="{Binding Column27}"/>
+                    <DataGridTextColumn Header="Column28" x:Name="dgtColumn28" Binding="{Binding Column28}"/>
+                    <DataGridTextColumn Header="Column29" x:Name="dgtColumn29" Binding="{Binding Column29}"/>
+                    <DataGridTextColumn Header="Column30" x:Name="dgtColumn30" Binding="{Binding Column30}"/>
+                    <DataGridTextColumn Header="Column31" x:Name="dgtColumn31" Binding="{Binding Column31}"/>
+                    <DataGridTextColumn Header="Column32" x:Name="dgtColumn32" Binding="{Binding Column32}"/>
+                    <DataGridTextColumn Header="Column33" x:Name="dgtColumn33" Binding="{Binding Column33}"/>
+                    <DataGridTextColumn Header="Column34" x:Name="dgtColumn34" Binding="{Binding Column34}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="1" Style="{StaticResource styleBtnStandard}" x:Name="btnSave" Click="btnSave_Click" Content="xSave"/>
+                <TextBlock Grid.Column="3" Style="{StaticResource styleTbkHeader}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" Name="tbkSaveMessage"/>
+                <Button Grid.Column="5" Style="{StaticResource styleBtnStandard}" x:Name="btnClose" Click="btnClose_Click" Content="xClose"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

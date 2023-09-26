@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_MachineState" Id="{98070847-8e62-4bf1-8cc3-9c885f60ccfc}">
+    <Declaration><![CDATA[// Calvin - E_MachineState
+// Rev 1.00 - April 26, 2023
+
+TYPE E_MachineState :
+(
+	eIdle						:= 0,
+	eWarmup,
+	eEvacuation,
+	eSteamBypass,
+	eDesorption,
+	eRepressurization,
+	eAdsorption,
+	eReset,
+	ePause,
+	eSystemError
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

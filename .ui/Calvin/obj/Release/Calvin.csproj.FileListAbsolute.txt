@@ -1,0 +1,102 @@
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\HelpManager\MessageWindow.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\Touch\Keyboard.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\HelpManager\MessageWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\MainWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\Touch\Keyboard.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\App.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\GeneratedInternalTypeHelper.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\App.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\MainWindow.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\Calvin.csproj.GenerateResource.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\Calvin.csproj.CoreCompileInputs.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\Calvin.csproj.CopyComplete
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\bin\Release\Calvin.exe.config
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\bin\Release\Calvin.exe
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\bin\Release\Calvin.pdb
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\Calvin_Content.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\Calvin_MarkupCompile.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\Calvin_MarkupCompile.lref
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\Calvin.g.resources
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\Calvin.exe
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\Calvin.pdb
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Carbon Capture\obj\Release\Calvin.Properties.Resources.resources
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\bin\Release\Calvin.exe.config
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\bin\Release\Calvin.exe
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\bin\Release\Calvin.pdb
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\Interop.JRO.dll
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\Calvin.csproj.ResolveComReference.cache
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\HelpManager\MessageWindow.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\ReportsManager\ReportWindow.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\Touch\Keyboard.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\App.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\ConfigManager\GraphConfig.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\HelpManager\PasswordWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\HelpManager\CartridgeWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\HelpManager\MessageCommentWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\HelpManager\MessageWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\MainWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\ReportsManager\ReportWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\Touch\Keyboard.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\App.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\Calvin_Content.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\GeneratedInternalTypeHelper.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\Calvin_MarkupCompile.cache
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\Calvin_MarkupCompile.lref
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\ConfigManager\GraphConfig.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\HelpManager\PasswordWindow.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\HelpManager\CartridgeWindow.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\HelpManager\MessageCommentWindow.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\MainWindow.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\Calvin.g.resources
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\Calvin.Properties.Resources.resources
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\Calvin.csproj.GenerateResource.cache
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\Calvin.csproj.CoreCompileInputs.cache
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\Calvin.csproj.CopyComplete
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\Calvin.exe
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\Calvin.pdb
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\HelpManager\EmailListWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\HelpManager\EmailListWindow.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\AdminManager\LogOnWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\AdminManager\LogOnWindow.baml
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\bin\Release\Calvin.exe.config
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\bin\Release\Calvin.exe
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\bin\Release\Calvin.pdb
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\Interop.JRO.dll
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\Calvin.csproj.ResolveComReference.cache
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\HelpManager\MessageWindow.baml
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\ReportsManager\ReportWindow.baml
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\Touch\Keyboard.baml
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\App.baml
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\ConfigManager\GraphConfig.g.cs
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\HelpManager\EmailListWindow.g.cs
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\HelpManager\PasswordWindow.g.cs
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\HelpManager\CartridgeWindow.g.cs
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\HelpManager\MessageCommentWindow.g.cs
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\HelpManager\MessageWindow.g.cs
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\MainWindow.g.cs
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\ReportsManager\ReportWindow.g.cs
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\Touch\Keyboard.g.cs
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\App.g.cs
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\Calvin_Content.g.cs
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\GeneratedInternalTypeHelper.g.cs
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\Calvin_MarkupCompile.cache
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\Calvin_MarkupCompile.lref
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\ConfigManager\GraphConfig.baml
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\HelpManager\EmailListWindow.baml
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\HelpManager\PasswordWindow.baml
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\HelpManager\CartridgeWindow.baml
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\HelpManager\MessageCommentWindow.baml
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\MainWindow.baml
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\Calvin.g.resources
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\Calvin.Properties.Resources.resources
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\Calvin.csproj.GenerateResource.cache
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\Calvin.csproj.CoreCompileInputs.cache
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\Calvin.csproj.CopyComplete
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\Calvin.exe
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\Calvin.pdb
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\AdminManager\LogOnWindow.g.cs
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\AdminManager\LogOnWindow.baml
+C:\Users\pstow\Documents\GitHub\reactor-calvin\ui\Calvin\obj\Release\Calvin.csproj.AssemblyReference.cache
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\HelpManager\SchemaWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\HelpManager\SchemaWindow.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Release\Calvin.csproj.AssemblyReference.cache

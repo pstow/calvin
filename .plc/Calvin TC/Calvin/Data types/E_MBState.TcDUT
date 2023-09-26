@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_MBState" Id="{b197f1a1-6450-4d59-a207-ade7570e0ce1}">
+    <Declaration><![CDATA[// Calvin - E_MBState
+// Rev 1.00 - April 6, 2023
+
+TYPE E_MBState :
+(
+	eMBIdle			 			:= 0,
+	eMBReadCoils,
+	eMBReadInputStatus,
+	eMBReadRegs,
+	eMBReadInputRegs,
+	eMBWriteSingleCoil,
+	eMBWriteSingleReg,
+	eMBWriteMultipleCoils,
+	eMBWriteRegs
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

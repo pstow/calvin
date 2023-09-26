@@ -1,0 +1,596 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="Global_Variables_Tags" Id="{6b985f70-39aa-430c-b090-add98534a0fb}">
+    <Declaration><![CDATA[// Calvin - Global_Variables_Tags
+// Rev 1.00 - September 20, 2023
+
+VAR_GLOBAL
+	
+	// {attribute 'OPC.UA.DA.Access' := '3'}			// 1=Read Only, 2=Write Only, 3=Read/Write (Default)
+	tgs_Current_User								: STRING;																// 7/21/23 PS - Added current user for HMI control
+	{attribute 'OPC.UA.DA' := '3'}  				
+	tgi_Current_User_Level							: INT;																	// 7/21/23 PS - Added current user level for HMI control
+	{attribute 'OPC.UA.DA' := '3'}  				
+	tgb_Hmi_Locked									: BOOL;																	// 7/22/23 PS - Added current user level for HMI control
+	{attribute 'OPC.UA.DA' := '3'}  				
+	tgs_Hmi_Log_Date_Time							: STRING;																// 7/22/23 PS - Added current user level for HMI control
+
+	{attribute 'OPC.UA.DA' := '3'}  				
+	tgr_SP_Adsorption_Time							: REAL;
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_SP_Adsorption_CO2_Differential				: REAL;
+	{attribute 'OPC.UA.DA' := '3'}  				
+	tgr_SP_Adsorption_CO2_Time						: REAL;
+	{attribute 'OPC.UA.DA' := '3'}
+	tgr_SP_Boiler_Temp								: REAL;
+	{attribute 'OPC.UA.DA' := '3'}
+	tgr_SP_Boiler_Pressure							: REAL;
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_SP_Min_LRP_Cooling_Loop_Flow				: REAL;
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_SP_Evacuation_Target_Pressure				: REAL;
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_SP_Evacuation_Target_Pressure_Steam			: REAL;																	// 07/14/23 PS - Added set point
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_SP_Max_Allowed_Pressure_Leakage				: REAL;
+	{attribute 'OPC.UA.DA' := '3'}
+	tgr_SP_Reactor_Repressurization_Pressure		: REAL;
+	{attribute 'OPC.UA.DA' := '3'}  				
+	tgr_SP_Adsorption_Temp							: REAL;
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_SP_Adsorption_VFD_Output					: REAL;
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_SP_Min_Bypass_Steam_Flow					: REAL;
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_SP_Min_Bypass_Steam_Temp					: REAL;
+	{attribute 'OPC.UA.DA' := '3'}  				
+	tgr_SP_IP_1302B_Reactor_Low						: REAL;
+	{attribute 'OPC.UA.DA' := '3'}  				      
+	tgr_SP_IP_1302B_Reactor_High					: REAL;
+	{attribute 'OPC.UA.DA' := '3'}  				      
+	tgr_SP_IP_1302B_Valve_Low						: REAL;
+	{attribute 'OPC.UA.DA' := '3'}  				      
+	tgr_SP_IP_1302B_Valve_High						: REAL;
+	{attribute 'OPC.UA.DA' := '3'}  				      
+	tgr_SP_Steam_Valve_Percent_Open					: REAL;
+	{attribute 'OPC.UA.DA' := '3'}  				      
+	tgr_SP_Max_Allowed_Sorbent_Temp					: REAL;
+	{attribute 'OPC.UA.DA' := '3'}                        
+	tgr_SP_Steam_Repressurization_Pressure			: REAL;
+	{attribute 'OPC.UA.DA' := '3'}                        
+	tgr_SP_Steam_Purge_Time							: REAL;
+	{attribute 'OPC.UA.DA' := '3'}                        
+	tgr_SP_Steam_Purge_Cutoff_Temp					: REAL;
+	{attribute 'OPC.UA.DA' := '3'}                        
+	tgr_SP_Evap_Cooling_Cutoff_Temp					: REAL;
+	{attribute 'OPC.UA.DA' := '3'}                        
+	tgr_SP_Evap_Cooling_Target_Pressure				: REAL;
+	{attribute 'OPC.UA.DA' := '3'}                        
+	tgr_SP_Leak_Check_Time							: REAL;
+	
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_Warmup_Complete								: BOOL;
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HMI_Active									: BOOL;						// An HMI program is running and communicating
+	{attribute 'OPC.UA.DA' := '2'}  				                
+	tgb_Auto_Mode									: BOOL;						// Machine is in Auto Mode
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_Watchdog									: BOOL;
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_ADS_Active									: BOOL;						// ADS HMI program is running and communicating
+	{attribute 'OPC.UA.DA' := '1'}  				
+	tgb_Active_Alarm								: BOOL;
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_Alarm_Reset									: BOOL;
+	{attribute 'OPC.UA.DA' := '1'}  				
+	tgb_Half_Sec_Pulse								: BOOL;
+	{attribute 'OPC.UA.DA' := '3'}  				
+	tgb_File_Save_Error								: BOOL;
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_Test_Mode									: BOOL;						// Start or stop test
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_Test_Running								: BOOL;						// Test is running
+	{attribute 'OPC.UA.DA' := '1'}  				
+	tgb_Stop_Cycle									: BOOL;
+	{attribute 'OPC.UA.DA' := '1'}  				
+	tgi_Current_Step								: INT;
+	{attribute 'OPC.UA.DA' := '1'}  				
+	tgi_Machine_State								: INT;
+	{attribute 'OPC.UA.DA' := '1'}  				
+	tgi_Alarm_State									: INT;						// Current Alarm State
+	{attribute 'OPC.UA.DA' := '1'}  				
+	tgi_Cycles_To_Run								: INT;
+	{attribute 'OPC.UA.DA' := '1'}  				
+	tgi_Cycle_Count									: INT;						// Number of TVSA cycles run since cycle restart
+	{attribute 'OPC.UA.DA' := '1'}  				
+	tgi_Status										: INT;
+	{attribute 'OPC.UA.DA' := '1'}  				
+	tgi_Total_Cycle_Count							: DINT;						// Total number of TVSA cycles run
+	{attribute 'OPC.UA.DA' := '1'}  				
+	tgr_Remaining_Time								: REAL;
+	{attribute 'OPC.UA.DA' := '1'}  				
+	tgs_Alarm										: STRING;
+	{attribute 'OPC.UA.DA' := '1'}  				
+	tgs_Active_Alarm								: STRING;
+	{attribute 'OPC.UA.DA' := '1'}  				
+	tgs_Status										: STRING;
+	
+	{attribute 'OPC.UA.DA' := '3'}  				
+	tgb_Drains_On									: BOOL;
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_Manual_Heater_Mode							: BOOL;						// Manual heater mode active
+	{attribute 'OPC.UA.DA' := '1'}  				
+	tgb_Adsorption_CO2								: BOOL;
+
+	
+	// Reactor
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_DPT_1102A									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_FIC_1102									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_AI_1102A									: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_AI_1102A_Pump								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_AI_1102A_Pump_On							: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_AI_1102A_Solenoid							: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_AI_1102A_Solenoid_On						: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_MI_1102A									: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_IP_1102A									: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_IP_1102A_Output								: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_ZT_1102A									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_PI_1100										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_DPT_1100									: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_IP_1102B									: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_IP_1102B_Output								: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_ZT_1102B									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_AI_1102B									: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_AI_1102B_Pump								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_AI_1102B_Pump_On							: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_AI_1102B_Solenoid							: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_AI_1102B_Solenoid_On						: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_MI_1102B									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_DPT_1102B									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_1102A									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_1102A_Error								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_1100A									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_1100A_Error								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_1100B									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_1100B_Error								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_1100C									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_1100C_Error								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_1102B									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_1102B_Error								: BOOL;			
+
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HS_1102									: REAL;
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HS_1102_Output								: REAL;
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_HS_1102_RPM									: REAL;			// Fan rpm
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_HS_1102V									: REAL;			// VFD frequency
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1102_Enabled								: BOOL;			// VFD enabled	
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1102_Running								: BOOL;			// Fan running
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1104										: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1104_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1104_Open								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1104_Closed								: BOOL;			
+	
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_IP_1102A_Open								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_IP_1102A_Closed								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_IP_1102B_Open								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_IP_1102B_Closed								: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_YL_1001										: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_YL_1001_On									: BOOL;			
+
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_FI_1200_1									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_FI_1200_2									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_FI_1200_3									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_FI_1201_1									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_FI_1201_2									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_FI_1201_3									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_PI_1200										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_PI_1001										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_1001										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_1001_Error								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_FI_1001										: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_IP_1101										: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_IP_1101_Output								: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_ZT_1101										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_PI_1101										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_1101										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_1101_Error								: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1107										: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1107_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1107_Open								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1107_Closed								: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1101A									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1101A_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1101A_Open								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1101A_Closed								: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1101B									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1101B_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1101B_Open								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1101B_Closed								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_1103										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_1103_Error								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_1104										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_1104_Error								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_1105										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_1105_Error								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_1106										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_1106_Error								: BOOL;			
+
+	// Condensate
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1201										: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1201_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1201_LSH									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1201_LSL									: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1103A									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1103A_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1103A_Open								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1103A_Closed								: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_IP_1302B									: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_IP_1302B_Output								: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_ZT_1302B									: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1103B									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1103B_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1103B_Open								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1103B_Closed								: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1203										: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1203_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1202										: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1202_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1202_LSH									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1202_LSL									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_LI_1204										: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1200										: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1200_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_SV_1201										: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_SV_1201_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_SV_1201_Open								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_SV_1201_Closed								: BOOL;			
+	
+	// Vacuum
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_AI_1300_1									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_AI_1300_2									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_AI_1300_3									: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1302A									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1302A_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1302A_Open								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1302A_Closed								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_PI_1300										: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1301A									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1301A_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1301A_Open								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1301A_Closed								: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1301B									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1301B_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1301B_Open								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1301B_Closed								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_1303										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_1303_Error								: BOOL;
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1301										: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1301_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_1304										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_1304_Error								: BOOL;
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_LIC_1300									: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1300B									: BOOL;
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1300B_On									: BOOL;
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1300B_Open								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1300B_Closed								: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1300A									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1300A_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1300A_LSH								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1300A_LSL								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_FI_1300										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_1302										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_1302_Error								: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HS_1305										: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_HS_1305_On									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_1301										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_1301_Error								: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_FI_1301										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_AI_1301										: REAL;			
+				                                           
+	// Heat Traces
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_P_Value									: REAL;						// Trace heater P factor
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_I_Value									: REAL;						// Trace heater I factor
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_I_Range									: REAL;						// Plus-minus range that Integral value is active in PID loop
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgi_Manual_Heater_Output						: INT	:= 0;				// Manual heater output value
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_1										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_1_Error									: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HT_1_On										: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_1_SP										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_HT_1_Ctrl									: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_1_Manual_Output							: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_1_Base_Output							: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_2										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_2_Error									: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HT_2_On										: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_2_SP										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_HT_2_Ctrl									: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_2_Manual_Output							: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_2_Base_Output							: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_3										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_3_Error									: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HT_3_On										: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_3_SP										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_HT_3_Ctrl									: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_3_Manual_Output							: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_3_Base_Output							: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_4										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_4_Error									: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HT_4_On										: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_4_SP										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_HT_4_Ctrl									: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_4_Manual_Output							: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_4_Base_Output							: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_5										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_5_Error									: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HT_5_On										: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_5_SP										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_HT_5_Ctrl									: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_5_Manual_Output							: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_5_Base_Output							: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_6										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_6_Error									: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgb_HT_6_On										: BOOL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_6_SP										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_HT_6_Ctrl									: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_6_Manual_Output							: REAL;			
+	{attribute 'OPC.UA.DA' := '3'}  				                
+	tgr_HT_6_Base_Output							: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_7										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_7_Error									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_8										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_8_Error									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_9										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_9_Error									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_10										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_10_Error									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_11										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_11_Error									: BOOL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_12										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgb_TI_12_Error									: BOOL;			
+	
+	// Current & Voltage
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_IT_1										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_IT_2										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_IT_3										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_VT_1										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_VT_2										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_VT_3										: REAL;			
+	
+	
+	// Weather Station
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_MI_2001										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_TI_2001										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_SI_2001										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_ZI_2001										: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_PI_2001										: REAL;			
+
+	// Inclinometer  				                
+	{attribute 'OPC.UA.DA' := '1'}
+	tgr_ZXI_2002									: REAL;			
+	{attribute 'OPC.UA.DA' := '1'}  				                
+	tgr_ZYI_2002									: REAL;			
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

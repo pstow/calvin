@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_Voltage" Id="{aad6c2b5-4cfe-40fe-83b6-60455098db85}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_Voltage : REAL
+VAR_INPUT
+	V_Reading				: INT;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Calvin - F_Voltage
+// Rev 1.0 - April 6, 2023
+
+F_Voltage					:= INT_TO_REAL(V_Reading) / 65.534;
+]]></ST>
+    </Implementation>
+    <LineIds Name="F_Voltage">
+      <LineId Id="10" Count="2" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

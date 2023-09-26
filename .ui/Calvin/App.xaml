@@ -1,0 +1,319 @@
+﻿<!-- Rev 1.00 - August 20, 2023 -->
+<Application x:Class="Calvin.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml">
+    
+    <Application.Resources>
+
+        <Style x:Key="styleWindowRed" TargetType="Window">
+            <Setter Property="Background" Value="Red"/>
+        </Style>
+        <Style x:Key="styleWindowGray" TargetType="Window">
+            <Setter Property="Background" Value="LightGray"/>
+        </Style>
+        <Style x:Key="styleWindowSeaGreen" TargetType="Window">
+            <Setter Property="Background" Value="SeaGreen"/>
+        </Style>
+        <Style x:Key="styleWindowLightBlue" TargetType="Window">
+            <Setter Property="Background" Value="LightBlue"/>
+        </Style>
+        <Style x:Key="styleWindowYellow" TargetType="Window">
+            <Setter Property="Background" Value="Yellow"/>
+        </Style>
+
+        <Style x:Key="styleTabHeader" TargetType="TabItem">
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <Style x:Key="styleCmbStandard" TargetType="ComboBox">
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Width" Value="125"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style x:Key="styleCmbColor" BasedOn="{StaticResource styleCmbStandard}" TargetType="ComboBox">
+            <Setter Property="Width" Value="50"/>
+        </Style>
+        <Style x:Key="styleCmbUnits" BasedOn="{StaticResource styleCmbStandard}" TargetType="ComboBox">
+            <Setter Property="Width" Value="75"/>
+        </Style>
+        <Style x:Key="styleCmbCartridge" TargetType="ComboBox">
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="Width" Value="160"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="styleBorder" TargetType="Border">
+            <Setter Property="BorderBrush" Value="Black"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Margin" Value="2"/>
+        </Style>
+
+        <Style x:Key="styleLine" TargetType="Line">
+            <Setter Property="Stroke" Value="Gray"/>
+            <Setter Property="Opacity" Value="0.6"/>
+            <Setter Property="StrokeThickness" Value="1"/>
+        </Style>
+        <Style x:Key="stylePolyline" TargetType="Polyline">
+            <Setter Property="StrokeThickness" Value="2"/>
+            <Setter Property="StrokeLineJoin" Value="Round"/>
+            <Setter Property="Canvas.Left" Value="0"/>
+            <Setter Property="Canvas.Top" Value="0"/>
+        </Style>
+
+        <Style x:Key="styleLblStandard" TargetType="Label">
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Width" Value="90"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="styleLblPower" BasedOn="{StaticResource styleLblStandard}" TargetType="Label">
+            <Setter Property="Width" Value="70"/>
+        </Style>
+        <Style x:Key="styleLblHeatTrace" BasedOn="{StaticResource styleLblStandard}" TargetType="Label">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Width" Value="75"/>
+            <Setter Property="Margin" Value="0,0,0,3"/>
+        </Style>
+        <Style x:Key="styleLblUnits" BasedOn="{StaticResource styleLblStandard}" TargetType="Label">
+            <Setter Property="Width" Value="70"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="0,4,0,4"/>
+        </Style>
+        <Style x:Key="styleLblHeader" BasedOn="{StaticResource styleLblStandard}" TargetType="Label">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Width" Value="350"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Top"/>
+        </Style>
+        <Style x:Key="styleLblBold" BasedOn="{StaticResource styleLblHeader}" TargetType="Label">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalContentAlignment" Value="Bottom"/>
+        </Style>
+        <Style x:Key="styleLblGraph" BasedOn="{StaticResource styleLblBold}" TargetType="Label">
+            <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="Width" Value="90"/>
+        </Style>
+        <Style x:Key="styleLblSetpoint1" BasedOn="{StaticResource styleLblBold}" TargetType="Label">
+            <Setter Property="Width" Value="240"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="HorizontalContentAlignment" Value="Right"/>
+        </Style>
+        <Style x:Key="styleLblSetpoint2" BasedOn="{StaticResource styleLblSetpoint1}" TargetType="Label">
+            <Setter Property="Width" Value="70"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="styleLblBoldL" BasedOn="{StaticResource styleLblBold}" TargetType="Label">
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+        <Style x:Key="styleLblBoldR" BasedOn="{StaticResource styleLblBold}" TargetType="Label">
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+        </Style>
+        <Style x:Key="styleLblError" BasedOn="{StaticResource styleLblBold}" TargetType="Label">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="Foreground" Value="Green"/>
+        </Style>
+        <Style x:Key="styleLblUser" BasedOn="{StaticResource styleLblBold}" TargetType="Label">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="styleLblTrendTemp" TargetType="Label">
+            <Setter Property="FontSize" Value="8"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        <Style x:Key="styleLblTrendTime" TargetType="Label">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Content" Value="0:00:00"/>
+        </Style>
+        <Style x:Key="styleLblState" TargetType="Label">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="styleLblHeader18" TargetType="Label">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="styleLblHeader14" BasedOn="{StaticResource styleLblHeader18}" TargetType="Label">
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style x:Key="styleLblCycle" BasedOn="{StaticResource styleLblHeader18}" TargetType="Label">
+            <Setter Property="HorizontalContentAlignment" Value="Right"/>
+            <Setter Property="Width" Value="180"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        <Style x:Key="styleLblCounts" BasedOn="{StaticResource styleLblCycle}" TargetType="Label">
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
+
+        <Style x:Key="styleButton" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="4" BorderThickness="2" BorderBrush="Gray" Background="{TemplateBinding Background}" Margin="{TemplateBinding Margin}" Height="{TemplateBinding Height}" Width="{TemplateBinding Width}">
+                            <ContentPresenter ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="styleBtnStandard" BasedOn="{StaticResource styleButton}" TargetType="Button">
+            <Setter Property="Border.Width" Value="77"/>
+            <Setter Property="Border.Height" Value="32"/>
+        </Style>
+        <Style x:Key="styleBtnError" BasedOn="{StaticResource styleBtnStandard}" TargetType="Button">
+            <Setter Property="Border.Height" Value="38"/>
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Opacity" Value="0.2"/>
+        </Style>
+        <Style x:Key="styleBtnStart" BasedOn="{StaticResource styleBtnStandard}" TargetType="Button">
+            <Setter Property="Border.Height" Value="35"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        </Style>
+        <Style x:Key="styleBtnManual" BasedOn="{StaticResource styleBtnStandard}" TargetType="Button">
+            <Setter Property="Border.Width" Value="68"/>
+            <Setter Property="Border.Height" Value="28"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style x:Key="styleBtnHeatTrace" BasedOn="{StaticResource styleBtnManual}" TargetType="Button">
+            <Setter Property="Border.Width" Value="58"/>
+        </Style>
+
+        <Style x:Key="styleTbxStandard" TargetType="{x:Type TextBox}">
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Width" Value="70"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Margin" Value="0,0,0,0"/>
+        </Style>
+        <Style x:Key="styleTbxKeyboard" BasedOn="{StaticResource styleTbxStandard}" TargetType="{x:Type TextBox}">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Margin" Value="0,-3,0,3"/>
+        </Style>
+        <Style x:Key="styleTbxDataEntry" BasedOn="{StaticResource styleTbxStandard}" TargetType="{x:Type TextBox}">
+            <Setter Property="Width" Value="60"/>
+        </Style>
+        <Style x:Key="styleTbxEmail" BasedOn="{StaticResource styleTbxStandard}" TargetType="{x:Type TextBox}">
+            <Setter Property="Width" Value="300"/>
+        </Style>
+        <Style x:Key="styleTbxCommentEntry" BasedOn="{StaticResource styleTbxStandard}" TargetType="{x:Type TextBox}">
+            <Setter Property="Width" Value="800"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="IsTabStop" Value="False"/>
+        </Style>
+        <Style x:Key="styleTbxPasswordEntry" BasedOn="{StaticResource styleTbxCommentEntry}" TargetType="{x:Type TextBox}">
+            <Setter Property="Width" Value="150"/>
+        </Style>
+        <Style x:Key="styleTbxValveEntry" BasedOn="{StaticResource styleTbxStandard}" TargetType="{x:Type TextBox}">
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Width" Value="65"/>
+        </Style>
+        <Style x:Key="styleTbxSetpointEntry1" BasedOn="{StaticResource styleTbxStandard}" TargetType="{x:Type TextBox}">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Width" Value="75"/>
+        </Style>
+        <Style x:Key="styleTbxSetpointEntry2" BasedOn="{StaticResource styleTbxSetpointEntry1}" TargetType="{x:Type TextBox}">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="styleTbxPoint" BasedOn="{StaticResource styleTbxDataEntry}" TargetType="{x:Type TextBox}">
+            <Setter Property="Width" Value="90"/>
+        </Style>
+        <Style x:Key="styleTbxAnalog" BasedOn="{StaticResource styleTbxDataEntry}" TargetType="{x:Type TextBox}">
+            <Setter Property="Width" Value="63"/>
+        </Style>
+
+        <Style x:Key="styleTbkStandard" TargetType="{x:Type TextBlock}">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Width" Value="90"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,0,0,3"/>
+        </Style>
+        <Style x:Key="styleTbkColor" TargetType="TextBlock">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Foreground" Value="Transparent"/>
+        </Style>
+        <Style x:Key="styleTbkStandardWide" BasedOn="{StaticResource styleTbkStandard}" TargetType="{x:Type TextBlock}">
+            <Setter Property="Width" Value="130"/>
+        </Style>
+        <Style x:Key="styleTbkStandardEmail" BasedOn="{StaticResource styleTbkStandard}" TargetType="{x:Type TextBlock}">
+            <Setter Property="Width" Value="300"/>
+        </Style>
+        <Style x:Key="styleTbkPointRight" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource styleTbkStandard}">
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="TextAlignment" Value="Right"/>
+        </Style>
+        <Style x:Key="styleTbkPointRightStatus" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource styleTbkPointRight}">
+            <Setter Property="Text" Value="Status"/>
+        </Style>
+        <Style x:Key="styleTbkPercent" TargetType="TextBlock" BasedOn="{StaticResource styleTbkPointRight}">
+            <Setter Property="Text" Value="%"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+        </Style>
+        <Style x:Key="styleTbkHeatTrace" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource styleTbkPointRight}">
+            <Setter Property="Width" Value="100"/>
+        </Style>
+        <Style x:Key="styleTbkGraph" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource styleTbkPointRight}">
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
+        <Style x:Key="styleTbkPointHeader" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource styleTbkStandard}">
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+        <Style x:Key="styleTbkHeader" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource styleTbkPointRight}">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="20"/>
+        </Style>
+
+        <Style x:Key="styleCheckBox" TargetType="CheckBox">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="LayoutTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1.6" ScaleY="1.6"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="styleCheckBox1" BasedOn="{StaticResource styleCheckBox}" TargetType="CheckBox">
+            <Setter Property="Margin" Value="0,-3,0,3"/>
+            <Setter Property="LayoutTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Application.Resources>
+</Application>

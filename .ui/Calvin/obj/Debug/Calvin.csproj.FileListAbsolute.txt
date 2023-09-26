@@ -1,0 +1,108 @@
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\bin\Debug\Calvin.exe.config
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\bin\Debug\Calvin.exe
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\bin\Debug\Calvin.pdb
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\bin\Debug\TwinCAT.Ads.dll
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\HelpManager\MessageWindow.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\Touch\Keyboard.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\HelpManager\MessageWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\MainWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\Touch\Keyboard.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\App.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\Calvin_Content.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\GeneratedInternalTypeHelper.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\Calvin_MarkupCompile.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\Calvin_MarkupCompile.lref
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\App.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\MainWindow.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\Calvin.g.resources
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\Calvin.Properties.Resources.resources
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\Calvin.csproj.GenerateResource.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\Calvin.csproj.CoreCompileInputs.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\Calvin.csproj.CopyComplete
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\Calvin.exe
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\Calvin.pdb
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin HMI\Calvin\obj\Debug\Calvin.csprojAssemblyReference.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\HelpManager\MessageWindow.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Touch\Keyboard.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\HelpManager\MessageWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\MainWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Touch\Keyboard.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\App.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin_Content.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\GeneratedInternalTypeHelper.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin_MarkupCompile.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin_MarkupCompile.lref
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.exe
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.pdb
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\bin\Debug\Calvin.exe.config
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\bin\Debug\Calvin.exe
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\bin\Debug\Calvin.pdb
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\bin\Debug\TwinCAT.Ads.dll
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\App.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\MainWindow.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.g.resources
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.Properties.Resources.resources
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.csproj.GenerateResource.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.csproj.CoreCompileInputs.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.csproj.CopyComplete
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.csprojAssemblyReference.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\bin\Debug\Calvin.exe.config
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\bin\Debug\Calvin.exe
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\bin\Debug\Calvin.pdb
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\bin\Debug\TwinCAT.Ads.dll
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\Calvin.csprojAssemblyReference.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\HelpManager\MessageWindow.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\Touch\Keyboard.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\HelpManager\MessageWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\MainWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\Touch\Keyboard.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\App.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\Calvin_Content.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\GeneratedInternalTypeHelper.g.cs
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\Calvin_MarkupCompile.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\Calvin_MarkupCompile.lref
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\App.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\MainWindow.baml
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\Calvin.g.resources
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\Calvin.Properties.Resources.resources
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\Calvin.csproj.GenerateResource.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\Calvin.csproj.CoreCompileInputs.cache
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\Calvin.csproj.CopyComplete
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\Calvin.exe
+C:\Users\pstow\Documents\Visual Studio 2017\Projects\Carbon Capture\Calvin\Test\Calvin HMI\Calvin\obj\Debug\Calvin.pdb
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Interop.JRO.dll
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.csproj.ResolveComReference.cache
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\HelpManager\MessageWindow.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Touch\Keyboard.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\App.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\ConfigManager\GraphConfig.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\HelpManager\CartridgeWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\HelpManager\MessageWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\MainWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Touch\Keyboard.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\App.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin_Content.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\GeneratedInternalTypeHelper.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin_MarkupCompile.cache
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin_MarkupCompile.lref
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\bin\Debug\Calvin.exe.config
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\bin\Debug\Calvin.exe
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\bin\Debug\Calvin.pdb
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\bin\Debug\TwinCAT.Ads.dll
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\ConfigManager\GraphConfig.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\HelpManager\CartridgeWindow.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\MainWindow.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.g.resources
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.Properties.Resources.resources
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.csproj.GenerateResource.cache
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.csproj.CoreCompileInputs.cache
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.csproj.CopyComplete
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.exe
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.pdb
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\ReportsManager\ReportWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\ReportsManager\ReportWindow.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\Calvin.csproj.AssemblyReference.cache
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\HelpManager\PasswordWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\HelpManager\MessageCommentWindow.g.cs
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\HelpManager\PasswordWindow.baml
+C:\Users\pstow\Documents\Visual Studio\Projects\Carbon Capture\Calvin\Calvin HMI\Calvin\obj\Debug\HelpManager\MessageCommentWindow.baml

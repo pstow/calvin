@@ -1,0 +1,254 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="Global_Variables" Id="{f9235986-0034-42f2-9b62-3292d4361b2a}">
+    <Declaration><![CDATA[// Calvin - Global_Variables
+// Rev 1.00 - September 20, 2023
+
+VAR_GLOBAL
+	eState											: E_MachineState;
+
+	grHS_1102Out									: REAL;
+	grSteamValveSP									: REAL;
+	gbVFDTest										: BOOL;
+	gbReadMBVFD										: BOOL;
+	gbReadMBWeather									: BOOL;
+	gbReadMBInclinometer							: BOOL;
+	gbHS_1102ValvesOpen								: BOOL;
+	gbHS_1102ValvesClosed							: BOOL;
+	gbVacuumHolding									: BOOL;
+
+	datain					AT %I*					: REAL;
+	dataout					AT %Q*					: BYTE;
+
+	// Reactor
+	DPT_1102A				AT %I*					: INT;			// Reactor Filter Differential Pressure (-7.46 to 7.46 mbar)
+	FIC_1102				AT %I*					: INT;			// Reactor Air flow
+	AI_1102A				AT %I*					: INT;			// Reactor Inlet C02 (ppm)
+	AI_1102A_Pump			AT %Q*					: BOOL;			// Inlet CO2 pump
+	AI_1102A_Solenoid		AT %Q*					: BOOL;			// Inlet CO2 solenoid
+	MI_1102A				AT %I*					: INT;			// Reactor Inlet H20 (ppm)
+	ZT_1102A				AT %I*					: INT;			// Reactor Inlet Isolation Valve Input
+	PI_1100					AT %I*					: INT;			// Reactor Pressure
+	TI_1102A				AT %I*					: INT;			// Reactor Inlet Temperature
+	TI_1102A_Error			AT %I*					: BOOL;			// Reactor Inlet Temperature Error
+	bTI_1102A_ErrActive								: BOOL;
+	TI_1100A				AT %I*					: INT;			// Reactor Sorbent Temperature A
+	TI_1100A_Error			AT %I*					: BOOL;			// Reactor Sorbent Temperature A Error
+	bTI_1100A_ErrActive								: BOOL;
+	TI_1100B				AT %I*					: INT;			// Reactor Sorbent Temperature B
+	TI_1100B_Error			AT %I*					: BOOL;			// Reactor Sorbent Temperature B Error
+	bTI_1100B_ErrActive								: BOOL;
+	TI_1100C				AT %I*					: INT;			// Reactor Sorbent Temperature C
+	TI_1100C_Error			AT %I*					: BOOL;			// Reactor Sorbent Temperature C Error
+	bTI_1100C_ErrActive								: BOOL;
+	DPT_1100				AT %I*					: INT;			// Reactor Differential Pressure
+	ZT_1102B				AT %I*					: INT;			// Reactor Outlet Isolation Valve Input
+	TI_1102B				AT %I*					: INT;			// Reactor Outlet Temperature
+	TI_1102B_Error			AT %I*					: BOOL;			// Reactor Outlet Temperature Error
+	bTI_1102B_ErrActive								: BOOL;
+	AI_1102B				AT %I*					: INT;			// Reactor Outlet C02 (ppm)
+	AI_1102B_Pump			AT %Q*					: BOOL;			// Outlet CO2 pump
+	AI_1102B_Solenoid		AT %Q*					: BOOL;			// Outlet CO2 solenoid
+	MI_1102B				AT %I*					: INT;			// Reactor Outlet H20 (ppm)
+	DPT_1102B				AT %I*					: INT;			// Reactor Fan Static Pressure
+	IP_1102A				AT %Q*					: INT;			// Reactor Inlet Isolation Butterfly Valve Output
+	IP_1102B				AT %Q*					: INT;			// Reactor Outlet Isolation Butterfly Valve Output
+	HS_1104					AT %Q*					: BOOL;			// Reactor valve
+	ZSH_1104				AT %I*					: BOOL;			// Reactor valve open
+	ZSL_1104				AT %I*					: BOOL;			// Reactor valve closed
+	TI_1103					AT %I*					: INT;			// Reactor Wall Temperature 1
+	TI_1103_Error			AT %I*					: BOOL;			// Reactor Wall Temperature 1 Error
+	bTI_1103_ErrActive								: BOOL;
+	TI_1104					AT %I*					: INT;			// Reactor Wall Temperature 1
+	TI_1104_Error			AT %I*					: BOOL;			// Reactor Wall Temperature 1 Error
+	bTI_1104_ErrActive								: BOOL;
+	TI_1105					AT %I*					: INT;			// Reactor Wall Temperature 1
+	TI_1105_Error			AT %I*					: BOOL;			// Reactor Wall Temperature 1 Error
+	bTI_1105_ErrActive								: BOOL;
+	TI_1106					AT %I*					: INT;			// Reactor Wall Temperature 1
+	TI_1106_Error			AT %I*					: BOOL;			// Reactor Wall Temperature 1 Error
+	bTI_1106_ErrActive								: BOOL;
+	
+	// Steam
+	FI_1200_1				AT %I*					: INT;			// Boiler Feed Flow
+	FI_1200_2				AT %I*					: INT;			// Boiler Feed Flow
+	FI_1200_3				AT %I*					: INT;			// Boiler Feed Flow
+	FI_1201_1				AT %I*					: INT;			// Boiler Feed Flow
+	FI_1201_2				AT %I*					: INT;			// Boiler Feed Flow
+	FI_1201_3				AT %I*					: INT;			// Boiler Feed Flow
+	PI_1200					AT %I*					: INT;			// Boiler Feed Water Pressure
+	PI_1001					AT %I*					: INT;			// Boiler Steam Pressure
+	TI_1001					AT %I*					: INT;			// Boiler Steam Temperature
+	TI_1001_Error			AT %I*					: BOOL;			// Boiler Steam Temperature Error
+	bTI_1001_ErrActive								: BOOL;
+	FI_1001					AT %I*					: INT;			// Steam Line Pressure
+	ZT_1101					AT %I*					: INT;			// Steam Control Valve Input
+	PI_1101					AT %I*					: INT;			// Steam Line Pressure
+	TI_1101					AT %I*					: INT;			// Steam Line Temperature
+	TI_1101_Error			AT %I*					: BOOL;			// Steam Line Temperature Error
+	bTI_1101_ErrActive								: BOOL;
+	ZSH_1107				AT %I*					: BOOL;			// Steam Bypass Valve High Limit Switch
+	ZSL_1107				AT %I*					: BOOL;			// Steam Bypass Valve Low Limit Switch
+	ZSH_1101A				AT %I*					: BOOL;			// Reactor Steam Isolation Valve A High Limit Switch
+	ZSL_1101A				AT %I*					: BOOL;			// Reactor Steam Isolation Valve A Low Limit Switch
+	ZSH_1101B				AT %I*					: BOOL;			// Reactor Steam Isolation Valve B High Limit Switch
+	ZSL_1101B				AT %I*					: BOOL;			// Reactor Steam Isolation Valve B Low Limit Switch
+	IP_1101					AT %Q*					: INT;			// Steam Control Valve Output
+	YL_1001					AT %Q*					: BOOL;			// Boiler Power Contactor
+	YL_1002					AT %Q*					: BOOL;			// Boiler Power Contactor
+	HS_1107					AT %Q*					: BOOL;			// Steam Bypass Valve Output
+	HS_1101A				AT %Q*					: BOOL;			// Reactor Steam Isolation Valve A
+	HS_1101B				AT %Q*					: BOOL;			// Reactor Steam Isolation Valve B
+	                                            	
+	// Condensate
+	HS_1201					AT %Q*					: BOOL;			// Reactor Drain Pump
+	LSH_1201				AT %I*					: BOOL;			// Reactor Drain Level High
+	LSL_1201				AT %I*					: BOOL;			// Reactor Drain Level Low
+	HS_1103A				AT %Q*					: BOOL;			// Reactor To Vacuum Isolation Valve A
+	ZSH_1103A				AT %I*					: BOOL;			// Reactor To Vacuum Isolation Valve A High Limit Switch
+	ZSL_1103A				AT %I*					: BOOL;			// Reactor To Vacuum Isolation Valve A Low Limit Switch
+	HS_1103B				AT %Q*					: BOOL;			// Reactor To Vacuum Isolation Valve B
+	ZSH_1103B				AT %I*					: BOOL;			// Reactor To Vacuum Isolation Valve B High Limit Switch
+	ZSL_1103B				AT %I*					: BOOL;			// Reactor To Vacuum Isolation Valve B Low Limit Switch
+	HS_1203					AT %Q*					: BOOL;			// Condenser Heater Motor
+	HS_1202					AT %Q*					: BOOL;			// Separator Drain Pump
+	LSH_1202				AT %I*					: BOOL;			// Separator Drain Level High Switch
+	LSL_1202				AT %I*					: BOOL;			// Separator Drain Level Low Switch
+	LI_1204					AT %I*					: INT;			// Condensate Tank Level
+	HS_1200					AT %Q*					: BOOL;			// Condensate/Boiler Feed Pump
+	SV_1201					AT %Q*					: BOOL;			// Refill valve													// 09/19/23 PS
+	ZSH_1202				AT %I*					: BOOL;			// Refill valve													// 09/19/23 PS
+	ZSL_1202				AT %I*					: BOOL;			// Refill valve													// 09/19/23 PS
+                                                	
+	// Vacuum
+	HS_1302A				AT %Q*					: BOOL;			// Vacuum Desorb Valve
+	ZSH_1302A				AT %I*					: BOOL;			// Vacuum Desorb Valve High Limit Switch
+	ZSL_1302A				AT %I*					: BOOL;			// Vacuum Desorb Valve Low Limit Switch
+	IP_1302B				AT %Q*					: INT;			// Ambient Steam Desorption Valve
+	ZT_1302B				AT %I*					: INT;			// Ambient Steam Desorption Valve feedback
+	PI_1300					AT %I*					: INT;			// Vacuum System Pressure
+	HS_1301A				AT %Q*					: BOOL;			// Eductor Valve
+	ZSH_1301A				AT %I*					: BOOL;			// Eductor Valve High Limit Switch
+	ZSL_1301A				AT %I*					: BOOL;			// Eductor Valve Low Limit Switch
+	HS_1301B				AT %Q*					: BOOL;			// Vacuum Diverter Valve
+	ZSH_1301B				AT %I*					: BOOL;			// Vacuum Diverter Valve High Limit Switch
+	ZSL_1301B				AT %I*					: BOOL;			// Vacuum Diverter Valve Low Limit Switch
+	TI_1303					AT %I*					: INT;			// Vacuum Temperature
+	TI_1303_Error			AT %I*					: BOOL;			// Vacuum Temperature Error
+	bTI_1303_ErrActive								: BOOL;
+	HS_1301					AT %Q*					: BOOL;			// Vacuum Pump
+	TI_1304					AT %I*					: INT;			// Vacuum Pump Outlet Temperature
+	TI_1304_Error			AT %I*					: BOOL;			// Vacuum Pump Outlet Temperature Error
+	bTI_1304_ErrActive								: BOOL;
+	LIC_1300				AT %I*					: INT;			// Vacuum Pump Discharge Separation Level
+	HS_1300B				AT %Q*					: BOOL;			// Automated Drain Valve
+	ZSH_1300				AT %I*					: BOOL;			// Automated Drain Valve High Limit Switch
+	ZSL_1300				AT %I*					: BOOL;			// Automated Drain Valve Low Limit Switch
+	HS_1300A				AT %Q*					: BOOL;			// Vacuum Cooling Pump/Seal Water Circulation Pump
+	LSH_1300A				AT %I*					: BOOL;			// Seal Water Circulation Pump Level High Switch
+	LSL_1300A				AT %I*					: BOOL;			// Seal Water Circulation Pump Level Low Switch
+	FI_1300					AT %I*					: INT;			// Flow Meter
+	TI_1302					AT %I*					: INT;			// Vacuum Cooler Input Temperature
+	TI_1302_Error			AT %I*					: BOOL;			// Vacuum Cooler Input Temperature Error
+	bTI_1302_ErrActive								: BOOL;
+	HS_1305					AT %Q*					: BOOL;			// Vacuum Cooler Motor
+	TI_1301					AT %I*					: INT;			// Vacuum Cooler Output Temperature
+	TI_1301_Error			AT %I*					: BOOL;			// Vacuum Cooler Output Temperature Error
+	bTI_1301_ErrActive								: BOOL;
+	FI_1301					AT %I*					: INT;			// CO2 Product Flow
+	AI_1301					AT %I*					: INT;			// CO2 Product Purity
+
+	// Heat Traces
+	TI_1					AT %I*					: INT;			// Heat Trace 1 Temperature
+	TI_1_Error				AT %I*					: BOOL;			// Heat Trace 1 Temperature Error
+	bTI_1_ErrActive									: BOOL;
+	TI_2					AT %I*					: INT;			// Heat Trace 2 Temperature
+	TI_2_Error				AT %I*					: BOOL;			// Heat Trace 2 Temperature Error
+	bTI_2_ErrActive									: BOOL;
+	TI_3					AT %I*					: INT;			// Heat Trace 3 Temperature
+	TI_3_Error				AT %I*					: BOOL;			// Heat Trace 3 Temperature Error
+	bTI_3_ErrActive									: BOOL;
+	TI_4					AT %I*					: INT;			// Heat Trace 4 Temperature
+	TI_4_Error				AT %I*					: BOOL;			// Heat Trace 4 Temperature Error
+	bTI_4_ErrActive									: BOOL;
+	TI_5					AT %I*					: INT;			// Heat Trace 5 Temperature
+	TI_5_Error				AT %I*					: BOOL;			// Heat Trace 5 Temperature Error
+	bTI_5_ErrActive									: BOOL;
+	TI_6					AT %I*					: INT;			// Heat Trace 6 Temperature
+	TI_6_Error				AT %I*					: BOOL;			// Heat Trace 6 Temperature Error
+	bTI_6_ErrActive									: BOOL;
+	TI_7					AT %I*					: INT;			// Heat Trace 7 Temperature
+	TI_7_Error				AT %I*					: BOOL;			// Heat Trace 7 Temperature Error
+	bTI_7_ErrActive									: BOOL;
+	TI_8					AT %I*					: INT;			// Heat Trace 8 Temperature
+	TI_8_Error				AT %I*					: BOOL;			// Heat Trace 8 Temperature Error
+	bTI_8_ErrActive									: BOOL;
+	TI_9					AT %I*					: INT;			// Heat Trace 9 Temperature
+	TI_9_Error				AT %I*					: BOOL;			// Heat Trace 9 Temperature Error
+	bTI_09_ErrActive								: BOOL;
+	TI_10					AT %I*					: INT;			// Heat Trace 10 Temperature
+	TI_10_Error				AT %I*					: BOOL;			// Heat Trace 10 Temperature Error
+	bTI_10_ErrActive								: BOOL;
+	TI_11					AT %I*					: INT;			// Heat Trace 11 Temperature
+	TI_11_Error				AT %I*					: BOOL;			// Heat Trace 11 Temperature Error
+	bTI_11_ErrActive								: BOOL;
+	TI_12					AT %I*					: INT;			// Heat Trace 12 Temperature
+	TI_12_Error				AT %I*					: BOOL;			// Heat Trace 12 Temperature Error
+	bTI_12_ErrActive	 							: BOOL;
+	HT_1_RELAY				AT %Q*					: BOOL;
+	HT_2_RELAY				AT %Q*					: BOOL;
+	HT_3_RELAY				AT %Q*					: BOOL;
+	HT_4_RELAY				AT %Q*					: BOOL;
+	HT_5_RELAY				AT %Q*					: BOOL;
+	HT_6_RELAY				AT %Q*					: BOOL;
+	HT_1_CTRL				AT %Q*					: INT;
+	HT_2_CTRL				AT %Q*					: INT;
+	HT_3_CTRL				AT %Q*					: INT;
+	HT_4_CTRL				AT %Q*					: INT;
+	HT_5_CTRL				AT %Q*					: INT;
+	HT_6_CTRL				AT %Q*					: INT;
+	
+	HS_1102_Enable			AT %Q*					: BOOL;
+	HS_1102_Out				AT %Q*					: INT;					
+	
+	// Current & Voltage measuement
+	IT_1					AT %I*					: INT;
+	IT_2					AT %I*					: INT;
+	IT_3					AT %I*					: INT;
+	VT_1					AT %I*					: INT;
+	VT_2					AT %I*					: INT;
+	VT_3					AT %I*					: INT;
+	
+	// LED Outputs
+	LED1_R					AT %Q*					: BOOL;
+	LED1_G					AT %Q*					: BOOL;
+	LED1_Buzzer				AT %Q*					: BOOL;
+	LED2_R					AT %Q*					: BOOL;
+	LED2_G					AT %Q*					: BOOL;
+	LED2_Buzzer				AT %Q*					: BOOL;
+
+	// Lightbar                                 	
+	LED3_R					AT %Q*					: BOOL;
+	LED3_Y					AT %Q*					: BOOL;
+	LED3_G					AT %Q*					: BOOL;
+	LED3_Buzzer				AT %Q*					: BOOL;
+	
+	// Weather Station
+	MI_2001					AT %I*					: INT;
+	TI_2001					AT %I*					: INT;
+	SI_2001					AT %I*					: INT;
+	ZI_2001					AT %I*					: INT;
+	PI_2001					AT %I*					: INT;
+	
+	// Inclinometer
+	ZXI_2002				AT %I*					: WORD;
+	ZYI_2002				AT %I*					: WORD;
+	                                            	
+	LightBar_Green			AT %Q*					: BOOL;
+	Lightbar_Yellow			AT %Q*					: BOOL;
+	Lightbar_Red			AT %Q*					: BOOL;
+	                                            	
+END_VAR
+]]></Declaration>
+  </GVL>
+</TcPlcObject>

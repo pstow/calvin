@@ -1,0 +1,185 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="P_HeaterControl" Id="{031a7e95-28a9-4956-9d75-7514ddae1925}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_HeaterControl
+VAR
+	TempControl_1									: FB_Temp_Control;
+	TempControl_2									: FB_Temp_Control;
+	TempControl_3									: FB_Temp_Control;
+	TempControl_4									: FB_Temp_Control;
+	TempControl_5									: FB_Temp_Control;
+	TempControl_6									: FB_Temp_Control;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Calvin - P_HeaterControl
+// Rev 1.00 - May 20, 2023
+
+IF giActiveAlarm <> 1 AND tgb_HT_1_On THEN
+	TempControl_1(
+		Set_Point									:= tgr_HT_1_SP, 
+		Temperature									:= tgr_TI_1, 
+		I_Range 									:= tgr_HT_I_Range, 
+		Pid_Cycle_Time								:= PID_CYCLE_TIME, 
+		Pid_Kp										:= tgr_HT_P_Value, 
+		Pid_Tn										:= tgr_HT_I_Value, 
+		Pid_Tv										:= 0, 
+		Pid_Td										:= 0,
+		Base_Output									:= tgr_HT_1_Base_Output,
+		Manual_Output								:= tgr_HT_1_Manual_Output,
+		Output										=> HT_1_CTRL);
+ELSE
+	HT_1_CTRL										:= 0;
+	HT_1_RELAY										:= FALSE;
+END_IF
+		
+IF giActiveAlarm <> 1 AND tgb_HT_2_On THEN
+	TempControl_2(
+		Set_Point									:= tgr_HT_2_SP, 
+		Temperature									:= tgr_TI_2, 
+		I_Range 									:= tgr_HT_I_Range,
+		Pid_Cycle_Time								:= PID_CYCLE_TIME, 
+		Pid_Kp										:= tgr_HT_P_Value, 
+		Pid_Tn										:= tgr_HT_I_Value, 
+		Pid_Tv										:= 0, 
+		Pid_Td										:= 0, 
+		Base_Output									:= tgr_HT_2_Base_Output,
+		Manual_Output								:= tgr_HT_2_Manual_Output, 
+		Output										=> HT_2_CTRL);
+ELSE
+	HT_2_CTRL										:= 0;
+	HT_2_RELAY										:= FALSE;
+END_IF
+		
+IF giActiveAlarm <> 1 AND tgb_HT_3_On THEN
+	TempControl_3(
+		Set_Point									:= tgr_HT_3_SP, 
+		Temperature									:= tgr_TI_3, 
+		I_Range 									:= tgr_HT_I_Range,
+		Pid_Cycle_Time								:= PID_CYCLE_TIME, 
+		Pid_Kp										:= tgr_HT_P_Value, 
+		Pid_Tn										:= tgr_HT_I_Value, 
+		Pid_Tv										:= 0, 
+		Pid_Td										:= 0, 
+		Base_Output									:= tgr_HT_3_Base_Output,
+		Manual_Output								:= tgr_HT_3_Manual_Output, 
+		Output										=> HT_3_CTRL);
+ELSE                                				
+	HT_3_CTRL										:= 0;
+	HT_3_RELAY										:= FALSE;
+END_IF
+		
+IF giActiveAlarm <> 1 AND tgb_HT_4_On THEN
+	TempControl_4(
+		Set_Point									:= tgr_HT_4_SP, 
+		Temperature									:= tgr_TI_4, 
+		I_Range 									:= tgr_HT_I_Range,
+		Pid_Cycle_Time								:= PID_CYCLE_TIME, 
+		Pid_Kp										:= tgr_HT_P_Value, 
+		Pid_Tn										:= tgr_HT_I_Value, 
+		Pid_Tv										:= 0, 
+		Pid_Td										:= 0,
+		Base_Output									:= tgr_HT_4_Base_Output,
+		Manual_Output								:= tgr_HT_4_Manual_Output, 
+		Output										=> HT_4_CTRL);
+ELSE                            				
+	HT_4_CTRL										:= 0;
+	HT_4_RELAY										:= FALSE;
+END_IF                          	
+		
+IF giActiveAlarm <> 1 AND tgb_HT_5_On THEN
+	TempControl_5(
+		Set_Point									:= tgr_HT_5_SP, 
+		Temperature									:= tgr_TI_5, 
+		I_Range 									:= tgr_HT_I_Range,
+		Pid_Cycle_Time								:= PID_CYCLE_TIME, 
+		Pid_Kp										:= tgr_HT_P_Value, 
+		Pid_Tn										:= tgr_HT_I_Value, 
+		Pid_Tv										:= 0, 
+		Pid_Td										:= 0,
+		Base_Output									:= tgr_HT_5_Base_Output,
+		Manual_Output								:= tgr_HT_5_Manual_Output,
+		Output										=> HT_5_CTRL);
+ELSE                        				
+	HT_5_CTRL										:= 0;
+	HT_5_RELAY										:= FALSE;
+END_IF
+		
+IF giActiveAlarm <> 1 AND tgb_HT_6_On THEN
+	TempControl_6(
+		Set_Point									:= tgr_HT_6_SP, 
+		Temperature									:= tgr_TI_6, 
+		I_Range 									:= tgr_HT_I_Range,
+		Pid_Cycle_Time								:= PID_CYCLE_TIME, 
+		Pid_Kp										:= tgr_HT_P_Value, 
+		Pid_Tn										:= tgr_HT_I_Value, 
+		Pid_Tv										:= 0, 
+		Pid_Td										:= 0, 
+		Base_Output									:= tgr_HT_6_Base_Output,
+		Manual_Output								:= tgr_HT_6_Manual_Output,
+		Output										=> HT_6_CTRL);
+ELSE                                	
+	HT_6_CTRL							:= 0;
+	HT_6_RELAY							:= FALSE;
+END_IF                              	
+	
+tgr_HT_1_Ctrl						:= INT_TO_REAL(HT_1_CTRL);
+tgr_HT_2_Ctrl						:= INT_TO_REAL(HT_2_CTRL);
+tgr_HT_3_Ctrl						:= INT_TO_REAL(HT_3_CTRL);
+tgr_HT_4_Ctrl						:= INT_TO_REAL(HT_4_CTRL);
+tgr_HT_5_Ctrl						:= INT_TO_REAL(HT_5_CTRL);
+tgr_HT_6_Ctrl						:= INT_TO_REAL(HT_6_CTRL);
+]]></ST>
+    </Implementation>
+    <LineIds Name="P_HeaterControl">
+      <LineId Id="6" Count="2" />
+      <LineId Id="267" Count="0" />
+      <LineId Id="17" Count="8" />
+      <LineId Id="322" Count="0" />
+      <LineId Id="200" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="268" Count="1" />
+      <LineId Id="271" Count="0" />
+      <LineId Id="270" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="272" Count="0" />
+      <LineId Id="140" Count="8" />
+      <LineId Id="323" Count="0" />
+      <LineId Id="201" Count="0" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="273" Count="3" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="293" Count="0" />
+      <LineId Id="151" Count="8" />
+      <LineId Id="324" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="277" Count="3" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="294" Count="0" />
+      <LineId Id="162" Count="8" />
+      <LineId Id="325" Count="0" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="281" Count="3" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="295" Count="0" />
+      <LineId Id="173" Count="8" />
+      <LineId Id="326" Count="0" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="285" Count="3" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="296" Count="0" />
+      <LineId Id="184" Count="8" />
+      <LineId Id="327" Count="0" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="289" Count="3" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="195" Count="4" />
+      <LineId Id="87" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

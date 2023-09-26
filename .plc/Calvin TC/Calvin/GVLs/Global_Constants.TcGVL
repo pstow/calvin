@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="Global_Constants" Id="{f03a959c-02cb-48ba-8c8c-5ccddccc88b1}">
+    <Declaration><![CDATA[// Calvin - Global_Constants
+// Rev 1.00 - September 22, 2023
+
+VAR_GLOBAL
+	PID_CYCLE_TIME									: REAL 		:= 0.01;		// PID cycle time for heaters
+	OUTPUT_MIN										: REAL		:= 200;			// Minimum output needed to energize solid state heater relay
+	PERCENT_FACTOR									: REAL		:= 327.67;		// Factor to convert input to output percentage
+	ALARM_COUNT										: INT		:= 100;			// Number of possible alarms
+	PRESSURE_CUTOFF									: REAL		:= 0.8;
+	DEFAULT_STEP_TIME								: REAL		:= 20000;		// 20 seconds default time
+	SECONDS											: REAL		:= 1000;
+	MINUTES											: REAL		:= 60000;
+	RESET_TIME										: REAL		:= 2000;
+	
+	CONDENSER_LEVEL_REFILL							: REAL		:= 20;											// 09/21/23 PS
+	CONDENSER_LEVEL_LOW_LIMIT						: REAL		:= 12;											// 09/21/23 PS
+	CONDENSER_LEVEL_HIGH_LIMIT						: REAL		:= 60;											// 09/21/23 PS
+	VACUUM_TANK_DRAIN_TIME							: REAL		:= 60;											// 09/22/23 PS
+	
+	MB_VFD_ENABLE_ADDR								: WORD		:= 8192;
+	MB_VFD_FREQ_ADDR								: WORD		:= 8193;
+	MB_VFD_BLOCK_ADDR								: WORD		:= 2315;
+	MODBUS_TIMEOUT									: TIME 		:= T#1S;
+	 
+	BV_OPEN_MAX										: REAL		:= 100.0;                               	
+	BV_OPEN_POS_THRESHOLD							: REAL		:= 10.0;			// Percent that valve must be within open position to trigger open status
+	BV_CLOSED_POS_THRESHOLD							: REAL		:= 2;				// Percent that valve must be within closed position to trigger closed status
+	                                					
+END_VAR                             				]]></Declaration>
+  </GVL>
+</TcPlcObject>

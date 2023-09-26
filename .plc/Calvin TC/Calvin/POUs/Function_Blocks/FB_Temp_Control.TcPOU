@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_Temp_Control" Id="{48f244aa-ced0-4683-b6ec-b6cba4c2ebb7}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Temp_Control
+VAR_INPUT
+	Set_Point										: REAL;				// Control set point
+	Temperature										: REAL;				// Current control loop temperature
+	I_Range											: REAL;				// Range that Integral value is active
+	Pid_Cycle_Time									: REAL;				// PID cycle time - matches task time
+	Pid_Kp											: REAL;				// Proportional gain
+	Pid_Tn											: REAL;				// Integral gain
+	Pid_Tv											: REAL;				// Derivative gain
+	Pid_Td											: REAL;				// Derivative damping time
+	Base_Output										: REAL;				// Estimated output value to hold setpoint
+	Base_I_Factor									: REAL;				// Base Integral gain
+	Base_I_Time										: REAL;				// Base Integral time
+	Manual_Output									: REAL;				// Manual heater output
+	Maximum_Output									: REAL := 32767;	// Maximum output value allowed 
+END_VAR
+VAR_OUTPUT
+	Output											: INT;				// Integer output to control PWM for heater relay
+	Current_Base									: REAL;
+END_VAR
+VAR
+	bReset											: BOOL;				// Reset PID FB on set point change
+	rOut											: REAL;				// Calculated output
+	rSetPoint										: REAL := 0;		// Last set point - reset on change
+	rBase											: REAL;
+	rBaseTn											: REAL;
+	rError											: REAL;										
+	lrTn											: LREAL;			// Integral gain calculation
+	lrOut											: LREAL;			// PID FB output
+	fb_BasicPID										: FB_BasicPID;
+	tonBase											: TON;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// FB_Temp_Control
+// Rev 1.00 - May 10, 2023
+
+IF Set_Point <> rSetPoint THEN																									// Check if set point has changed
+	bReset											:= TRUE;																	// Reset function block if it has changed
+	rSetPoint 										:= Set_Point;																// Save new value to reset check
+	rBase											:= Base_Output;
+ELSE
+	bReset											:= FALSE;																	// No change, do not reset
+END_IF
+
+// Control heater output & PID loop based on current temperature and the set point range
+rError												:= Set_Point - Temperature;
+IF ABS(rError) <= I_Range THEN
+	lrTn											:= REAL_TO_LREAL(Pid_Tn);													// Use Integral gain only if within range (Proportional + base otherwise)
+	rBaseTn											:= Base_I_Factor;
+ELSE
+	lrTn											:= 0;
+	rBaseTn											:= 0;
+END_IF
+
+IF tgb_Manual_Heater_Mode THEN
+	rOut											:= REAL_TO_INT(Manual_Output);
+ELSE
+	fb_BasicPID(
+		fSetpointValue								:= Set_Point,
+		fActualValue								:= Temperature,
+		bReset										:= bReset,
+		fCtrlCycleTime								:= Pid_Cycle_Time,
+		fKp											:= Pid_Kp,
+		fTn											:= lrTn,
+		fTv											:= REAL_TO_LREAL(Pid_Tv),
+		fTd											:= REAL_TO_LREAL(Pid_Td),
+		fCtrlOutput									=> lrOut,
+		nErrorStatus								=> );
+
+	IF tonBase.Q THEN
+		tonBase(IN:= FALSE);
+		rBase										:= rBase + rError * Base_I_Factor; 
+	END_IF
+	
+	rOut											:= LREAL_TO_REAL(lrOut) + rBase;
+	rOut											:= SEL(rOut < 0, SEL(rOut > Maximum_Output, rOut, Maximum_Output), 0);		// Keep PID output within range of INT value
+END_IF
+
+Output												:= REAL_TO_INT(rOut);
+tonBase(IN:= TRUE, PT:= REAL_TO_TIME(Base_I_Time));
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Temp_Control">
+      <LineId Id="87" Count="0" />
+      <LineId Id="49" Count="1" />
+      <LineId Id="219" Count="2" />
+      <LineId Id="318" Count="0" />
+      <LineId Id="222" Count="3" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="315" Count="0" />
+      <LineId Id="304" Count="0" />
+      <LineId Id="306" Count="2" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="303" Count="0" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="309" Count="0" />
+      <LineId Id="95" Count="1" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="107" Count="10" />
+      <LineId Id="311" Count="0" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="312" Count="0" />
+      <LineId Id="316" Count="0" />
+      <LineId Id="313" Count="0" />
+      <LineId Id="320" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="270" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="272" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="310" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

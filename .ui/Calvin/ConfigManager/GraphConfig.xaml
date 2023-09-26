@@ -1,0 +1,139 @@
+﻿<!-- Rev 1.00 - March 29, 2023 -->
+<Window x:Class="Calvin.ConfigManager.GraphConfig"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Keypad="clr-namespace:Calvin.Touch"
+        mc:Ignorable="d"
+        Title="Graph Configuration" Height="420" Width="460" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Activated="Window_Activated">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="60"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="140"/>
+                <ColumnDefinition Width="1"/>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="1"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" x:Name="lblFocus" Focusable="True"/>
+            <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource styleTbkHeader}" Text="Graph 1"/>
+            <TextBlock Grid.Row="0" Grid.Column="5" Style="{StaticResource styleTbkStandard}" VerticalAlignment="Bottom" Text="Low"/>
+            <TextBlock Grid.Row="0" Grid.Column="6" Style="{StaticResource styleTbkStandard}" VerticalAlignment="Bottom" Text="High"/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource styleTbkPointRight}" Text="Input 1"/>
+            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource styleTbkPointRight}" Text="Input 2"/>
+            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource styleTbkPointRight}" Text="Input 3"/>
+            <ComboBox Grid.Row="1" Grid.Column="1" Style="{StaticResource styleCmbStandard}" Name="cmbGraph0" SelectionChanged="cmbGraph_SelectionChanged"/>
+            <ComboBox Grid.Row="2" Grid.Column="1" Style="{StaticResource styleCmbStandard}" Name="cmbGraph1" SelectionChanged="cmbGraph_SelectionChanged"/>
+            <ComboBox Grid.Row="3" Grid.Column="1" Style="{StaticResource styleCmbStandard}" Name="cmbGraph2" SelectionChanged="cmbGraph_SelectionChanged"/>
+
+            <ComboBox Grid.Row="1" Grid.Column="3" Style="{StaticResource styleCmbColor}" Name="cmbColor0" ItemsSource="{Binding ColorList}" SelectedItem="{Binding SelectedColor}" SelectionChanged="cmbColor_SelectionChanged">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Background="{Binding}">
+                            <TextBlock Text="{Binding}" Style="{StaticResource styleTbkColor}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ComboBox Grid.Row="2" Grid.Column="3" Style="{StaticResource styleCmbColor}" Name="cmbColor1" ItemsSource="{Binding ColorList}" SelectedItem="{Binding SelectedColor}" SelectionChanged="cmbColor_SelectionChanged">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Background="{Binding}">
+                            <TextBlock Text="{Binding}" Style="{StaticResource styleTbkColor}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ComboBox Grid.Row="3" Grid.Column="3" Style="{StaticResource styleCmbColor}" Name="cmbColor2" ItemsSource="{Binding ColorList}" SelectedItem="{Binding SelectedColor}" SelectionChanged="cmbColor_SelectionChanged">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Background="{Binding}">
+                            <TextBlock Text="{Binding}" Style="{StaticResource styleTbkColor}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Keypad:TextBoxKeyboard Grid.Row="1" Grid.Column="5" Style="{StaticResource styleTbxDataEntry}" KBMode="RealNeg" Decimals="2" x:Name="kpdGraph0_Low" TextChanged="kpd_TextChanged"/>
+            <Keypad:TextBoxKeyboard Grid.Row="1" Grid.Column="6" Style="{StaticResource styleTbxDataEntry}" KBMode="RealNeg" Decimals="2" x:Name="kpdGraph0_High" TextChanged="kpd_TextChanged"/>
+            <Keypad:TextBoxKeyboard Grid.Row="2" Grid.Column="5" Style="{StaticResource styleTbxDataEntry}" KBMode="RealNeg" Decimals="2" x:Name="kpdGraph1_Low" TextChanged="kpd_TextChanged"/>
+            <Keypad:TextBoxKeyboard Grid.Row="2" Grid.Column="6" Style="{StaticResource styleTbxDataEntry}" KBMode="RealNeg" Decimals="2" x:Name="kpdGraph1_High" TextChanged="kpd_TextChanged"/>
+            <Keypad:TextBoxKeyboard Grid.Row="3" Grid.Column="5" Style="{StaticResource styleTbxDataEntry}" KBMode="RealNeg" Decimals="2" x:Name="kpdGraph2_Low" TextChanged="kpd_TextChanged"/>
+            <Keypad:TextBoxKeyboard Grid.Row="3" Grid.Column="6" Style="{StaticResource styleTbxDataEntry}" KBMode="RealNeg" Decimals="2" x:Name="kpdGraph2_High" TextChanged="kpd_TextChanged"/>
+
+            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource styleTbkHeader}" Text="Graph 2"/>
+            <TextBlock Grid.Row="4" Grid.Column="5" Style="{StaticResource styleTbkStandard}" VerticalAlignment="Bottom" Text="Low"/>
+            <TextBlock Grid.Row="4" Grid.Column="6" Style="{StaticResource styleTbkStandard}" VerticalAlignment="Bottom" Text="High"/>
+            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource styleTbkPointRight}" Text="Input 1"/>
+            <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource styleTbkPointRight}" Text="Input 2"/>
+            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource styleTbkPointRight}" Text="Input 3"/>
+            <ComboBox Grid.Row="5" Grid.Column="1" Style="{StaticResource styleCmbStandard}" Name="cmbGraph3" SelectionChanged="cmbGraph_SelectionChanged"/>
+            <ComboBox Grid.Row="6" Grid.Column="1" Style="{StaticResource styleCmbStandard}" Name="cmbGraph4" SelectionChanged="cmbGraph_SelectionChanged"/>
+            <ComboBox Grid.Row="7" Grid.Column="1" Style="{StaticResource styleCmbStandard}" Name="cmbGraph5" SelectionChanged="cmbGraph_SelectionChanged"/>
+
+            <ComboBox Grid.Row="5" Grid.Column="3" Style="{StaticResource styleCmbColor}" Name="cmbColor3" ItemsSource="{Binding ColorList}" SelectedItem="{Binding SelectedColor}" SelectionChanged="cmbColor_SelectionChanged">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Background="{Binding}">
+                            <TextBlock Text="{Binding}" Style="{StaticResource styleTbkColor}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ComboBox Grid.Row="6" Grid.Column="3" Style="{StaticResource styleCmbColor}" Name="cmbColor4" ItemsSource="{Binding ColorList}" SelectedItem="{Binding SelectedColor}" SelectionChanged="cmbColor_SelectionChanged">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Background="{Binding}">
+                            <TextBlock Text="{Binding}" Style="{StaticResource styleTbkColor}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ComboBox Grid.Row="7" Grid.Column="3" Style="{StaticResource styleCmbColor}" Name="cmbColor5" ItemsSource="{Binding ColorList}" SelectedItem="{Binding SelectedColor}" SelectionChanged="cmbColor_SelectionChanged">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Background="{Binding}">
+                            <TextBlock Text="{Binding}" Style="{StaticResource styleTbkColor}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Keypad:TextBoxKeyboard Grid.Row="5" Grid.Column="5" Style="{StaticResource styleTbxDataEntry}" KBMode="RealNeg" Decimals="2" x:Name="kpdGraph3_Low" TextChanged="kpd_TextChanged"/>
+            <Keypad:TextBoxKeyboard Grid.Row="5" Grid.Column="6" Style="{StaticResource styleTbxDataEntry}" KBMode="RealNeg" Decimals="2" x:Name="kpdGraph3_High" TextChanged="kpd_TextChanged"/>
+            <Keypad:TextBoxKeyboard Grid.Row="6" Grid.Column="5" Style="{StaticResource styleTbxDataEntry}" KBMode="RealNeg" Decimals="2" x:Name="kpdGraph4_Low" TextChanged="kpd_TextChanged"/>
+            <Keypad:TextBoxKeyboard Grid.Row="6" Grid.Column="6" Style="{StaticResource styleTbxDataEntry}" KBMode="RealNeg" Decimals="2" x:Name="kpdGraph4_High" TextChanged="kpd_TextChanged"/>
+            <Keypad:TextBoxKeyboard Grid.Row="7" Grid.Column="5" Style="{StaticResource styleTbxDataEntry}" KBMode="RealNeg" Decimals="2" x:Name="kpdGraph5_Low" TextChanged="kpd_TextChanged"/>
+            <Keypad:TextBoxKeyboard Grid.Row="7" Grid.Column="6" Style="{StaticResource styleTbxDataEntry}" KBMode="RealNeg" Decimals="2" x:Name="kpdGraph5_High" TextChanged="kpd_TextChanged"/>
+
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Style="{StaticResource styleBtnStart}" Content="Save" x:Name="btnSaveGraph" Click="btnSaveGraph_Click" IsEnabled="False"/>
+            <Button Grid.Column="1" Style="{StaticResource styleBtnStart}" Content="Exit" x:Name="btnExitGraph" Click="btnExitGraph_Click"/>
+        </Grid>
+    </Grid>
+
+</Window>

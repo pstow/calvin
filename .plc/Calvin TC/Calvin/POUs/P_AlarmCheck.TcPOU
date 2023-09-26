@@ -1,0 +1,178 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="P_AlarmCheck" Id="{03553a6e-9cbc-471e-8aa4-fd7a5f3d7d39}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_AlarmCheck
+VAR
+	rtrigCheckErrors								: R_TRIG;
+	ftrigClearError									: F_TRIG;
+	tonAlarmTimer									: TON;
+	i												: INT;
+	iMultipleTempError								: INT;
+	iErrorCount										: INT;
+	iCount											: INT;
+	iDisplayAlarm									: INT := 1;
+	iAlarm											: ARRAY[1..20] OF INT;
+	iActiveAlarms									: ARRAY[1..10] OF INT;								// 08/05/23 PS
+	iActiveAlarmCount								: INT;												// 08/05/23 PS
+	iCurrentAlarm									: INT;												// 08/05/23 PS
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Calvin - P_Alarm_Check
+// Rev 1.00 - August 5, 2023
+
+IF NOT gbAlarmsLoaded THEN
+	A_LoadAlarms();
+END_IF
+
+IF tgb_Alarm_Reset THEN
+	tgs_Alarm										:= '00';
+	FOR i := 1 TO ALARM_COUNT DO
+		gbAlarms[i]									:= FALSE;
+	END_FOR
+	tgb_Alarm_Reset									:= FALSE;
+	eState											:= eIdle;
+	tgi_Alarm_State									:= 0;
+END_IF
+
+// 08/05/23 PS - Updated to handle multiple alarms
+IF giActiveAlarm > 0 THEN
+	iActiveAlarmCount								:= SEL(iActiveAlarmCount < 10, iActiveAlarmCount, iActiveAlarmCount + 1);
+	iActiveAlarms[iActiveAlarmCount]				:= giActiveAlarm;
+	giActiveAlarm									:= 0;
+END_IF
+
+ftrigClearError(CLK:= tgb_Active_Alarm);
+IF ftrigClearError.Q THEN
+	FOR i:= 1 TO 9 DO
+		iActiveAlarms[i] 							:= iActiveAlarms[i+1];
+	END_FOR
+	iActiveAlarms[10]								:= 0;
+	iActiveAlarmCount								:= iActiveAlarmCount - 1;
+END_IF
+
+IF tonAlarmTimer.Q THEN
+	IF iActiveAlarmCount > 0 THEN
+		iCurrentAlarm								:= iActiveAlarms[1];
+		tgb_Active_Alarm 							:= TRUE;
+		gbAlarms[iCurrentAlarm]						:= TRUE;
+		tgs_Active_Alarm							:= CONCAT(gsAlarms[iCurrentAlarm], gsTempAlarm);
+		gsTempAlarm									:= '';
+	END_IF
+END_IF
+
+rtrigCheckErrors(CLK:= tgb_Half_Sec_Pulse);
+IF rtrigCheckErrors.Q THEN
+	iErrorCount										:= 0;
+	FOR i := 1 TO ALARM_COUNT DO
+		IF gbAlarms[i] THEN
+			iErrorCount								:= iErrorCount + 1;
+			iAlarm[iErrorCount]						:= i;
+		END_IF
+	END_FOR
+	iCount											:= iCount + 1;
+
+	IF iErrorCount > 1 THEN
+		IF iCount >= 1 AND iCount <= 3 THEN
+			tgs_Alarm								:= gsAlarms[iAlarm[iDisplayAlarm]];
+		ELSE
+			tgs_Alarm								:= '00';							// Blank label for one half second
+			iCount									:= 0;
+			iDisplayAlarm							:= iDisplayAlarm + 1;
+			IF iDisplayAlarm > iErrorCount THEN
+				iDisplayAlarm 						:= 1;
+			END_IF
+		END_IF
+	ELSIF iErrorCount = 1 THEN
+		iCount										:= 0;
+		iDisplayAlarm								:= 1;
+		tgs_Alarm									:= gsAlarms[iAlarm[1]];
+	ELSE
+		iCount										:= 0;
+		tgs_Alarm 									:= ALARM_00;
+	END_IF
+END_IF
+
+tonAlarmTimer(IN:= NOT tgb_Active_Alarm, PT:= T#750MS);
+
+IF tgb_File_Save_Error THEN
+	tgb_File_Save_Error								:= FALSE;
+	giActiveAlarm									:= eSystem_Alarm;
+	gsAlarmInfo[eSystem_Alarm]						:= gsFileSaveError;
+	gbAlarms[eSystem_Alarm]							:= TRUE;
+	gbAlarmsLoaded									:= FALSE;                                                       // Clear flag to reload alarms with alarm string
+END_IF
+]]></ST>
+    </Implementation>
+    <Action Name="A_LoadAlarms" Id="{ab341ad3-f747-4275-9c7d-273707f29686}">
+      <Implementation>
+        <ST><![CDATA[// Calvin - P_Alarm_Check.A_LoadAlarms
+// Rev 1.00 - June 12, 2023
+
+gsAlarms[0]										:= ALARM_00;
+gsAlarms[1]										:= CONCAT(ALARM_01, gsAlarmInfo[eWarmup_Alarm]);
+gsAlarms[2]										:= CONCAT(ALARM_02, gsAlarmInfo[eEvacuation_Alarm]);
+gsAlarms[3]										:= CONCAT(ALARM_03, gsAlarmInfo[eSteamBypass_Alarm]);
+gsAlarms[4]										:= CONCAT(ALARM_04, gsAlarmInfo[eDesorption_Alarm]);
+gsAlarms[5]										:= CONCAT(ALARM_05, gsAlarmInfo[eRepressurization_Alarm]);
+gsAlarms[6]										:= CONCAT(ALARM_06, gsAlarmInfo[eAdsorption_Alarm]);
+gsAlarms[7]										:= CONCAT(ALARM_07, gsAlarmInfo[eSystem_Alarm]);
+gsAlarms[8]										:= CONCAT(ALARM_08, gsAlarmInfo[eTC_Alarm]);
+gsAlarms[9]										:= CONCAT(ALARM_09, gsAlarmInfo[eSystem_Alarm]);
+gsAlarms[10]									:= ALARM_10;
+gsAlarms[11]									:= ALARM_11;
+gsAlarms[12]									:= ALARM_12;
+gsAlarms[13]									:= ALARM_13;
+gsAlarms[14]									:= ALARM_14;
+gsAlarms[15]									:= ALARM_15;
+gsAlarms[16]									:= ALARM_16;
+gsAlarms[17]									:= ALARM_17;
+gsAlarms[18]									:= ALARM_18;
+gsAlarms[19]									:= ALARM_19;
+gsAlarms[20]									:= ALARM_20;
+gsAlarms[21]									:= CONCAT(ALARM_21, gsAlarmInfo[21]);
+gsAlarms[22]									:= CONCAT(ALARM_22, gsAlarmInfo[22]);
+gsAlarms[23]									:= ALARM_23;
+gsAlarms[24]									:= ALARM_24;
+gsAlarms[25]									:= ALARM_25;
+gsAlarms[26]									:= ALARM_26;
+gsAlarms[27]									:= ALARM_27;
+gsAlarms[28]									:= ALARM_28;
+gsAlarms[29]									:= ALARM_29;
+gsAlarms[30]									:= ALARM_30;
+gsAlarms[31]									:= ALARM_31;
+gsAlarms[32]									:= ALARM_32;
+gsAlarms[33]									:= ALARM_33;
+gsAlarms[34]									:= ALARM_34;
+gsAlarms[35]									:= ALARM_35;
+gsAlarms[36]									:= ALARM_36;
+gsAlarms[37]									:= ALARM_37;
+gsAlarms[38]									:= ALARM_38;
+gsAlarms[39]									:= ALARM_39;
+gsAlarms[40]									:= ALARM_40;
+gsAlarms[41]									:= ALARM_41;
+gsAlarms[42]									:= ALARM_42;
+gsAlarms[43]									:= ALARM_43;
+gsAlarms[44]									:= ALARM_44;
+gsAlarms[45]									:= ALARM_45;
+gsAlarms[46]									:= ALARM_46;
+gsAlarms[47]									:= ALARM_47;
+gsAlarms[48]									:= ALARM_48;
+gsAlarms[49]									:= ALARM_49;
+gbAlarmsLoaded									:= TRUE;
+]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="P_AlarmCheck">
+      <LineId Id="704" Count="83" />
+      <LineId Id="612" Count="0" />
+    </LineIds>
+    <LineIds Name="P_AlarmCheck.A_LoadAlarms">
+      <LineId Id="2" Count="2" />
+      <LineId Id="6" Count="7" />
+      <LineId Id="56" Count="1" />
+      <LineId Id="15" Count="40" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

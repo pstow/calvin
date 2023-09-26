@@ -1,0 +1,49 @@
+﻿<!-- Rev 1.00 - April 21, 2023 -->
+<Window x:Class="Calvin.HelpManager.MessageWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="MessageWindow" Height="210" MinWidth="350" MaxWidth="800" SizeToContent="Width" WindowStyle="None" WindowStartupLocation="Manual" Left="30" Top="135" Activated="Window_Activated" Visibility="Visible" KeyDown="Window_KeyDown" Topmost="True">
+
+    <Border>
+        <StackPanel Orientation="Vertical">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="45"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="60"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="50"/>
+                </Grid.ColumnDefinitions>
+                <Image Grid.Row="1" Grid.Column="1" Margin="10,4,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Source="/Calvin;component/Resources/Exclaimation.ico" />
+                <TextBlock Grid.Row="3" Grid.Column="1" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" x:Name="tbkText"/>
+            </Grid>
+            <Grid HorizontalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="15"/>
+                    <RowDefinition Height="40"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="90"/>
+                    <ColumnDefinition Width="25"/>
+                    <ColumnDefinition Width="90" x:Name="MWCol03"/>
+                    <ColumnDefinition Width="25"/>
+                    <ColumnDefinition Width="90"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource styleBtnStart}" Width="85" x:Name="btnYes" Content="Yes" Click="btnYes_Click"/>
+                <Button Grid.Row="1" Grid.Column="3" Style="{StaticResource styleBtnStart}" Width="85" x:Name="btnOKCancel" Click="btnOKCancel_Click"/>
+                <Button Grid.Row="1" Grid.Column="5" Style="{StaticResource styleBtnStart}" Width="85" x:Name="btnNo" Content="No" Click="btnNo_Click"/>
+            </Grid>
+        </StackPanel>
+    </Border>
+</Window>
+

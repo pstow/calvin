@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_Current" Id="{7bbfe232-33e3-452f-b368-50ff52d822fe}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_Current : REAL
+VAR_INPUT
+	I_Reading				: INT;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Calvin - F_Current
+// Rev 1.0 - April 6, 2023
+
+F_Current					:= INT_TO_REAL(I_Reading) / 163.835;
+]]></ST>
+    </Implementation>
+    <LineIds Name="F_Current">
+      <LineId Id="10" Count="2" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_Status" Id="{0ec80929-bb97-4a74-8001-1a47c015e8f7}">
+    <Declaration><![CDATA[// Calvin - E_Status
+// Rev 1.00 - April 27, 2023
+
+TYPE E_Status :
+(
+	eStart_Warm_Up						:= 0,
+	eWarmup_Running,							// 1
+	eStart_Reactor_Reset,						// 2
+	eSystem_Ready,								// 3
+	eEvacuation_Running,						// 4
+	eSteamBypass_Running,						// 5
+	eRepressurization_Running,					// 6
+	eDesorption_Running,						// 7
+	eAdsorption_Running,						// 8
+	e9,
+	eStopping_Process,							// 10
+	eStopping_Warmup,							// 11
+	eStopping_Evacuation,						// 12
+	eStopping_SteamBypass,						// 13
+	eStopping_Repressurization,					// 14
+	eStopping_Desorption,						// 15
+	eStopping_Adsorption,						// 16
+	e17,
+	eCycle_Error,								// 18
+	e19,
+	e20,
+	eTest_Running,								// 21
+	eEvacuation_Process_Error,					// 22
+	eSteamBypass_Process_Error,					// 23
+	eRepressurization_Process_Error,			// 24
+	eDesorption_Process_Error,					// 25
+	eAdsorption_Process_Error,					// 26
+	e27,
+	e28,
+	e29,
+	eEvacuation_Complete,						// 30
+	eSteamBypass_Complete,						// 31
+	eRepressurization_Complete,					// 32
+	eDesorption_Complete,						// 33
+	eAdsorption_Complete						// 34
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

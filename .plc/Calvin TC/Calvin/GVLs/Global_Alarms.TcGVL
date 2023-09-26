@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="Global_Alarms" Id="{7c154f5f-ebc4-48cb-bc32-6dfa0696254b}">
+    <Declaration><![CDATA[// Calvin - Global_Alarms
+// Rev 1.00 - September 22, 2023
+
+VAR_GLOBAL
+	gbAlarmsLoaded									: BOOL;
+	gbRunVFD										: BOOL;
+	giActiveAlarm									: INT;
+	gbAlarms										: ARRAY[0..100] OF BOOL;
+	gsAlarms										: ARRAY[0..100] OF STRING;
+	gsAlarmInfo										: ARRAY[0..100] OF STRING;
+	gsTempAlarm										: STRING;
+
+	gsTI_1101Error									: STRING	:= '-TI_1101 sensor error';						// 09/20/23 PS
+	gsLowCondenserLevel								: STRING	:= '-Condenser level low';						// 09/07/23 PS
+	gsTK1300HighLevel								: STRING	:= '-TK_1300 level high';
+	
+	gsBoilerPressureLow								: STRING	:= '-Boiler pressure low';
+	gsDrainNotClear									: STRING	:= '-Drain not clear';
+	gsValvesNotClosed								: STRING	:= '-Valves not closed';
+	gsValvesNotOpen									: STRING	:= '-Valves not open';
+	gsLRPCoolingFlowLow								: STRING	:= '-LRP cooling flow low';
+	gsTargetPressureHigh							: STRING	:= '-Target pressure high';
+	gsPI_1300OutOfRange								: STRING	:= '-PI_1300 out of range';
+	gsPI_1100OutOfRange								: STRING	:= '-PI_1100 out of range';
+	gsPI_1100PressureLow							: STRING	:= '-PI_1100 pressure low';
+	gsPI_1101PressureLow							: STRING	:= '-PI_1101 pressure low';
+	gsPI_1001PressureLow							: STRING	:= '-PI_1001 pressure low';
+	gsVacuumLeak									: STRING	:= '-Vacuum leak';
+	gsSteamFlowLow									: STRING	:= '-Steam flow low';
+	gsSteamTempLow									: STRING	:= '-Steam temperature low';
+	gsSteamTempError								: STRING	:= '-Steam temperature sensor error';
+	gsLimitSwitchError								: STRING	:= '-Limit swtich error';
+	gsValveOutOfRange								: STRING	:= '-Valve out of range';
+	gsReactorPressureLow							: STRING	:= '-Reactor pressure low';
+	gsThermocoupleError								: STRING	:= '-Thermocouple error';
+	gsSorbentOverTemp								: STRING	:= '-Sorbent over temperature';
+	gsTempOutOfRange								: STRING	:= '-Temperature out of range';
+	gsNoAirFlow										: STRING	:= '-No air flow';
+	gsCO2DifferentialError							: STRING	:= '-CO2 differential error';
+	gsFanStillRunning								: STRING	:= '-Fan still runiing';
+	gsFileSaveError									: STRING	:= 'File save error';
+	
+	ALARM_00										: STRING	:= '00/No Alarms';								// These must correspond to E_Alarms values
+	ALARM_01										: STRING	:= '01/ Warmup Error - ';
+	ALARM_02										: STRING	:= '02/ Evacuation Error - ';
+	ALARM_03										: STRING	:= '03/ Steam Bypass Error - ';
+	ALARM_04										: STRING	:= '04/ Desorption Error - ';
+	ALARM_05										: STRING	:= '05/ Repressurization Error - ';
+	ALARM_06										: STRING	:= '06/ Adsorption Error - ';
+	ALARM_07										: STRING	:= '07/ System Error - ';
+	ALARM_08										: STRING	:= '08/ Thermocouple Error';
+	ALARM_09										: STRING	:= '09/Alarm';
+	ALARM_10										: STRING	:= '10/Alarm';
+	ALARM_11										: STRING	:= '11/Alarm';
+	ALARM_12										: STRING	:= '12/Alarm';
+	ALARM_13										: STRING	:= '13/Alarm';
+	ALARM_14										: STRING	:= '14/Alarm';
+	ALARM_15										: STRING	:= '15/Alarm';
+	ALARM_16										: STRING	:= '16/Alarm';
+	ALARM_17										: STRING	:= '17/Alarm';
+	ALARM_18										: STRING	:= '18/Alarm';
+	ALARM_19										: STRING	:= '19/Alarm';
+	ALARM_20										: STRING	:= '20/Alarm';
+	ALARM_21										: STRING	:= '21Timeout Error';
+	ALARM_22										: STRING	:= '22Alarm';
+	ALARM_23										: STRING	:= '23Alarm';
+	ALARM_24										: STRING	:= '24Alarm';
+	ALARM_25										: STRING	:= '25Alarm';
+	ALARM_26										: STRING	:= '26Alarm';
+	ALARM_27										: STRING	:= '27Alarm';
+	ALARM_28										: STRING	:= '28Alarm';
+	ALARM_29										: STRING	:= '29Alarm';
+	ALARM_30										: STRING	:= '30Alarm';
+	ALARM_31										: STRING	:= '31Alarm';
+	ALARM_32										: STRING	:= '32Alarm';
+	ALARM_33										: STRING	:= '33Alarm';
+	ALARM_34										: STRING	:= '34Alarm';
+	ALARM_35										: STRING	:= '35Alarm';
+	ALARM_36										: STRING	:= '36Alarm';
+	ALARM_37										: STRING	:= '37Alarm';
+	ALARM_38										: STRING	:= '38Alarm';
+	ALARM_39										: STRING	:= '39Alarm';
+	ALARM_40										: STRING	:= '40Alarm';
+	ALARM_41										: STRING	:= '41Alarm';
+	ALARM_42										: STRING	:= '42Alarm';
+	ALARM_43										: STRING	:= '43Alarm';
+	ALARM_44										: STRING	:= '44Alarm';
+	ALARM_45										: STRING	:= '45Alarm';
+	ALARM_46										: STRING	:= '46Alarm';
+	ALARM_47										: STRING	:= '47Alarm';
+	ALARM_48										: STRING	:= '48Alarm';
+	ALARM_49										: STRING	:= '49Alarm';
+	ALARM_50										: STRING	:= '50Alarm';
+END_VAR                             				]]></Declaration>
+  </GVL>
+</TcPlcObject>
